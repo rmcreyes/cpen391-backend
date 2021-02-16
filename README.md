@@ -1,6 +1,9 @@
 # cpen391-backend
 The backend to our CPEN 391 project
 
+# API documentation
+https://www.postman.com/steveny9911/workspace/cpen-391-backend/overview
+
 # Set-up
 **Requirement**
 - NodeJS 14
