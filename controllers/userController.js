@@ -13,7 +13,7 @@ const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
-  const { name, email, password } = req.body;
+  const { firstName, lastName, email, password, licensePlate} = req.body;
 
   let hashedPassword;
   try {
@@ -24,9 +24,11 @@ const signup = async (req, res, next) => {
   }
 
   const createdUser = new User({
-    name,
+    firstName,
+    lastName,
     email,
     password: hashedPassword,
+    licensePlate
   });
 
   try {
@@ -83,7 +85,7 @@ const login = async (req, res, next) => {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: process.env.TOKEN_EXPIRE_TIME }
     );
   } catch {
     return next(new HttpError('Login failed, please try again', 500));
@@ -115,13 +117,13 @@ const updateUserProfile = async (req, res, next) => {
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
   const { userId } = req.userData;
-  const { name, email } = req.body;
+  const { firstName, lastName, email, licensePlate } = req.body;
 
   let updatedUser;
   try {
     updatedUser = await User.findOneAndUpdate(
       { _id: userId },
-      { name, email },
+      { firstName, lastName, email, licensePlate },
       { new: true }
     );
   } catch (err) {
