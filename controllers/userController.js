@@ -58,7 +58,7 @@ const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password)
-    return next(new HttpError('Invalid credentials, could not login', 401));
+    return next(new HttpError('Invalid credentials', 401));
 
   let existingUser;
   try {
