@@ -13,7 +13,6 @@ userRouter.post(
     check('lastName').not().isEmpty(),
     check('email').normalizeEmail().isEmail(),
     check('password').not().isEmpty(),
-    check('licensePlate').isLength({ min: 6, max: 6 }),
   ],
   userController.signup
 );
