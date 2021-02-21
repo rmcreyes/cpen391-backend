@@ -32,6 +32,15 @@ describe('Authentication Tests', () => {
     token = res.body.token;
   });
 
+  it('404 not found any car because none are added', async () => {
+    const res = await api
+      .get(`/api/car/${userId}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(404);
+    expect(res.body.message).toEqual('Not found');
+  });
+
   it('201 add car successful', async () => {
     const newCar = {
       carName: 'MY_CAR',
@@ -65,6 +74,17 @@ describe('Authentication Tests', () => {
     expect(res.body.licensePlate).toEqual(newCar.licensePlate.toUpperCase());
     expect(res.body.id).toBeTruthy();
     expect(res.body.userId).toEqual(userId);
+  });
+
+  it('200 get all cars', async () => {
+    const res = await api
+      .get(`/api/car/${userId}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.cars.length).toEqual(2);
+    expect(res.body.cars[0].licensePlate).toEqual('123ABC');
+    expect(res.body.cars[1].licensePlate).toEqual('098XYZ');
   });
 
   it('422 failed add car invalid input', async () => {

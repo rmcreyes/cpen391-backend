@@ -8,6 +8,26 @@ const HttpError = require('../utils/HttpError');
 const Car = require('../models/car');
 const User = require('../models/user');
 
+const getCars = async (req, res, next) => {
+  const userId = req.params.userId;
+
+  if (req.userData.userId === null || req.userData.userId !== userId)
+    return next(new HttpError('Token missing or invalid', 401));
+
+  let savedCars;
+  try {
+    savedCars = await Car.find({ userId: userId });
+
+    if (!savedCars || savedCars.length === 0 || !Array.isArray(savedCars))
+      return next(new HttpError('Not found', 404));
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Failed getting cars', 500));
+  }
+
+  res.status(200).json({ cars: savedCars });
+};
+
 const postCar = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
@@ -53,4 +73,4 @@ const postCar = async (req, res, next) => {
   }
 };
 
-module.exports = { postCar };
+module.exports = { getCars, postCar };
