@@ -9,10 +9,10 @@ const userRouter = express.Router();
 userRouter.post(
   '/signup',
   [
-    check('firstName').not().isEmpty(),
-    check('lastName').not().isEmpty(),
+    check('firstName').isString().notEmpty(),
+    check('lastName').isString().notEmpty(),
     check('email').normalizeEmail().isEmail(),
-    check('password').not().isEmpty(),
+    check('password').isString().notEmpty(),
   ],
   userController.signup
 );
@@ -26,10 +26,10 @@ userRouter.get('/me', userController.getUserProfile);
 userRouter.put(
   '/me',
   [
-    check('firstName').not().isEmpty(),
-    check('lastName').not().isEmpty(),
+    check('firstName').isString().notEmpty(),
+    check('lastName').isString().notEmpty(),
     check('email').normalizeEmail().isEmail(),
-    check('password').not().isEmpty(),
+    check('password').isString().notEmpty(),
     check('licensePlate').isLength({ min: 6, max: 6 }),
   ],
   userController.updateUserProfile

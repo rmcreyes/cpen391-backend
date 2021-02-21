@@ -8,9 +8,13 @@ const carRouter = express.Router();
 
 carRouter.use(auth);
 
-carRouter.get('/:userId', carController.getCars);
+carRouter.get('/:userId', [check('userId').isMongoId()], carController.getCars);
 
-carRouter.get('/:userId/:carId', carController.getCar);
+carRouter.get(
+  '/:userId/:carId',
+  [check('userId').isMongoId(), check('carId').isMongoId()],
+  carController.getCar
+);
 
 carRouter.post(
   '/:userId',
@@ -18,6 +22,16 @@ carRouter.post(
   carController.postCar
 );
 
-carRouter.delete('/:userId/:carId', carController.deleteCar);
+carRouter.delete(
+  '/:userId/:carId',
+  [check('userId').isMongoId(), check('carId').isMongoId()],
+  carController.deleteCar
+);
+
+// carRouter.put(
+//   '/:userId/:carId',
+//   [check('carName').isString()],
+//   carController.putCar
+// );
 
 module.exports = carRouter;
