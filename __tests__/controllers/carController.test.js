@@ -41,39 +41,41 @@ describe('Authentication Tests', () => {
     expect(res.body.message).toEqual('Not found');
   });
 
+  let carOne = {
+    carName: 'MY_CAR',
+    licensePlate: '123ABC',
+  };
   it('201 add car successful', async () => {
-    const newCar = {
-      carName: 'MY_CAR',
-      licensePlate: '123ABC',
-    };
-
     const res = await api
       .post(`/api/car/${userId}`)
       .set('Authorization', `Bear ${token}`)
-      .send(newCar);
+      .send(carOne);
 
     expect(res.statusCode).toEqual(201);
-    expect(res.body.carName).toEqual(newCar.carName);
-    expect(res.body.licensePlate).toEqual(newCar.licensePlate.toUpperCase());
+    expect(res.body.carName).toEqual(carOne.carName);
+    expect(res.body.licensePlate).toEqual(carOne.licensePlate.toUpperCase());
     expect(res.body.id).toBeTruthy();
     expect(res.body.userId).toEqual(userId);
+
+    carOne.id = res.body.id;
   });
 
+  let carTwo = {
+    licensePlate: '098CBA',
+  };
   it('201 add car without carName', async () => {
-    const newCar = {
-      licensePlate: '098XYZ',
-    };
-
     const res = await api
       .post(`/api/car/${userId}`)
       .set('Authorization', `Bear ${token}`)
-      .send(newCar);
+      .send(carTwo);
 
     expect(res.statusCode).toEqual(201);
-    expect(res.body.carName).toEqual(newCar.licensePlate.toUpperCase());
-    expect(res.body.licensePlate).toEqual(newCar.licensePlate.toUpperCase());
+    expect(res.body.carName).toEqual(carTwo.licensePlate.toUpperCase());
+    expect(res.body.licensePlate).toEqual(carTwo.licensePlate.toUpperCase());
     expect(res.body.id).toBeTruthy();
     expect(res.body.userId).toEqual(userId);
+
+    carTwo.id = res.body.id;
   });
 
   it('200 get all cars', async () => {
@@ -83,8 +85,22 @@ describe('Authentication Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.cars.length).toEqual(2);
-    expect(res.body.cars[0].licensePlate).toEqual('123ABC');
-    expect(res.body.cars[1].licensePlate).toEqual('098XYZ');
+    expect(res.body.cars[0].licensePlate).toEqual(carOne.licensePlate);
+    expect(res.body.cars[0].id).toEqual(carOne.id);
+    expect(res.body.cars[1].licensePlate).toEqual(carTwo.licensePlate);
+    expect(res.body.cars[1].id).toEqual(carTwo.id);
+  });
+
+  it('200 get one car', async () => {
+    let res = await api
+      .get(`/api/car/${userId}/${carOne.id}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.licensePlate).toEqual(carOne.licensePlate);
+    expect(res.body.id).toEqual(carOne.id);
+    expect(res.body.name).toEqual(carOne.name);
+    expect(res.body.userId).toEqual(userId);
   });
 
   it('422 failed add car invalid input', async () => {
@@ -117,7 +133,7 @@ describe('Authentication Tests', () => {
 
   it('422 failed add car existing license plate', async () => {
     const newCar = {
-      licensePlate: '098XYZ',
+      licensePlate: carOne.licensePlate,
     };
 
     const res = await api

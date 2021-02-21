@@ -10,6 +10,8 @@ carRouter.use(auth);
 
 carRouter.get('/:userId', carController.getCars);
 
+carRouter.get('/:userId/:carId', carController.getCar);
+
 carRouter.post(
   '/:userId',
   [check('licensePlate').isLength({ min: 6, max: 6 })],

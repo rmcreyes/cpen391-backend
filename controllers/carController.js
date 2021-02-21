@@ -28,6 +28,31 @@ const getCars = async (req, res, next) => {
   res.status(200).json({ cars: savedCars });
 };
 
+const getCar = async (req, res, next) => {
+  const userId = req.params.userId;
+  const carId = req.params.carId;
+
+  if (req.userData.userId === null || req.userData.userId !== userId || !carId)
+    return next(new HttpError('Token missing or invalid', 401));
+
+  let savedCar;
+  try {
+    savedCar = await Car.findById(carId);
+
+    if (!savedCar) return next(new HttpError('Not found', 404));
+
+    if (!savedCar.userId || savedCar.userId != userId) {
+      LOG.error(req._id, 'Miss match userId and carId!');
+      return next(new HttpError('Invalid user car', 500));
+    }
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Failed getting car', 500));
+  }
+
+  res.status(200).json(savedCar);
+};
+
 const postCar = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
@@ -73,4 +98,4 @@ const postCar = async (req, res, next) => {
   }
 };
 
-module.exports = { getCars, postCar };
+module.exports = { getCars, getCar, postCar };
