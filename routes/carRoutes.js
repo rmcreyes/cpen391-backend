@@ -18,4 +18,6 @@ carRouter.post(
   carController.postCar
 );
 
+carRouter.delete('/:userId/:carId', carController.deleteCar);
+
 module.exports = carRouter;

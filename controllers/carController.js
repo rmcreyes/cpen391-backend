@@ -98,4 +98,31 @@ const postCar = async (req, res, next) => {
   }
 };
 
-module.exports = { getCars, getCar, postCar };
+const deleteCar = async (req, res, next) => {
+  const userId = req.params.userId;
+  const carId = req.params.carId;
+
+  if (req.userData.userId === null || req.userData.userId !== userId || !carId)
+    return next(new HttpError('Token missing or invalid', 401));
+
+  try {
+    const deletedCar = await Car.findOneAndDelete({
+      _id: carId,
+      userId: userId,
+    });
+
+    if (!deletedCar)
+      return next(new HttpError('Not found or already deleted', 404));
+
+    const user = await User.findById(userId);
+    await user.cars.remove(carId);
+    await user.save();
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Failed deleting car', 500));
+  }
+
+  return res.status(200).json({ message: 'Deleted car' });
+};
+
+module.exports = { getCars, getCar, postCar, deleteCar };

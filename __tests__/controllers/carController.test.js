@@ -145,6 +145,35 @@ describe('Authentication Tests', () => {
     expect(res.body.message).toEqual('Car already exist');
   });
 
+  it('200 delete one car', async () => {
+    let res = await api
+      .delete(`/api/car/${userId}/${carOne.id}/`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.message).toEqual('Deleted car');
+  });
+
+  it('404 already deleted car', async () => {
+    let res = await api
+      .delete(`/api/car/${userId}/${carOne.id}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(404);
+    expect(res.body.message).toEqual('Not found or already deleted');
+  });
+
+  it('200 get all cars (should only have one now)', async () => {
+    const res = await api
+      .get(`/api/car/${userId}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.cars.length).toEqual(1);
+    expect(res.body.cars[0].licensePlate).toEqual(carTwo.licensePlate);
+    expect(res.body.cars[0].id).toEqual(carTwo.id);
+  });
+
   afterAll(async done => {
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.close();
