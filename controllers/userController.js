@@ -54,6 +54,9 @@ const signup = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const { email, password } = req.body;
 
   if (!email || !password)
@@ -98,6 +101,9 @@ const login = async (req, res, next) => {
 };
 
 const getUserProfile = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const { userId } = req.userData;
 
   let user;

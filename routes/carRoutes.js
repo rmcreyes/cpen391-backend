@@ -28,10 +28,14 @@ carRouter.delete(
   carController.deleteCar
 );
 
-// carRouter.put(
-//   '/:userId/:carId',
-//   [check('carName').isString()],
-//   carController.putCar
-// );
+carRouter.put(
+  '/:userId/:carId',
+  [
+    check('carName').isString().notEmpty(),
+    check('userId').isMongoId(),
+    check('carId').isMongoId(),
+  ],
+  carController.putCar
+);
 
 module.exports = carRouter;

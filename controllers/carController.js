@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const assert = require('assert');
+
 const { validationResult } = require('express-validator');
 
 const LOG = require('../utils/logger');
@@ -9,6 +11,9 @@ const Car = require('../models/car');
 const User = require('../models/user');
 
 const getCars = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const userId = req.params.userId;
 
   if (req.userData.userId === null || req.userData.userId !== userId)
@@ -29,6 +34,9 @@ const getCars = async (req, res, next) => {
 };
 
 const getCar = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const userId = req.params.userId;
   const carId = req.params.carId;
 
@@ -99,6 +107,9 @@ const postCar = async (req, res, next) => {
 };
 
 const deleteCar = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const userId = req.params.userId;
   const carId = req.params.carId;
 
@@ -125,4 +136,41 @@ const deleteCar = async (req, res, next) => {
   return res.status(200).json({ message: 'Deleted car' });
 };
 
-module.exports = { getCars, getCar, postCar, deleteCar };
+const putCar = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
+  const userId = req.params.userId;
+  const carId = req.params.carId;
+
+  if (req.userData.userId === null || req.userData.userId !== userId || !carId)
+    return next(new HttpError('Token missing or invalid', 401));
+
+  const { carName } = req.body;
+  if (!carName) return next(new HttpError('Missing parameter', 401));
+
+  try {
+    let savedCar = await Car.findOneAndUpdate(
+      {
+        _id: carId,
+        userId: userId,
+      },
+      { carName: carName },
+      { new: true }
+    );
+
+    assert(savedCar.carName === carName);
+    assert(savedCar.userId.toString() === userId);
+    assert(savedCar.id === carId);
+
+    return res.status(200).json(savedCar);
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    if (exception.name === 'AssertionError')
+      next(new HttpError('Error updating car', 500));
+
+    next(new HttpError('Failed updating car', 500));
+  }
+};
+
+module.exports = { getCars, getCar, postCar, deleteCar, putCar };

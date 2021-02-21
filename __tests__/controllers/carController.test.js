@@ -174,6 +174,31 @@ describe('Authentication Tests', () => {
     expect(res.body.cars[0].id).toEqual(carTwo.id);
   });
 
+  it('200 update one car', async () => {
+    let newName = 'NEW_CAR_NAME';
+
+    const res = await api
+      .put(`/api/car/${userId}/${carTwo.id}`)
+      .set('Authorization', `Bear ${token}`)
+      .send({ carName: newName });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.carName).toEqual(newName);
+    expect(res.body.licensePlate).toEqual(carTwo.licensePlate);
+    expect(res.body.id).toEqual(carTwo.id);
+
+    carTwo.carName = newName;
+  });
+
+  it('422 failed update one car invalid parameter', async () => {
+    const res = await api
+      .put(`/api/car/${userId}/${carTwo.id}`)
+      .set('Authorization', `Bear ${token}`);
+
+    expect(res.statusCode).toEqual(422);
+    expect(res.body.message).toEqual('Invalid inputs');
+  });
+
   afterAll(async done => {
     await mongoose.connection.db.dropDatabase();
     await mongoose.connection.close();
