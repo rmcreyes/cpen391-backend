@@ -10,19 +10,22 @@ const meterRouter = express.Router();
 
 meterRouter.post(
   '/addMeter',
-  [check('unitPrice').isNumeric()],
+  [check('unitPrice').isNumeric().notEmpty()],
   meterController.addMeter
 );
 
 meterRouter.get(
   '/:meterId',
-  [check('meterId').isMongoId()],
+  [check('meterId').isMongoId().notEmpty()],
   meterController.getStatus
 );
 
 meterRouter.put(
   '/:meterId',
-  [check('meterId').isMongoId(), check('occupied').isBoolean()],
+  [
+    check('meterId').isMongoId().notEmpty(),
+    check('occupied').isBoolean().notEmpty(),
+  ],
   meterController.updateStatus
 );
 
