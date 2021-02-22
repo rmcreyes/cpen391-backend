@@ -29,8 +29,6 @@ userRouter.put(
     check('firstName').isString().notEmpty(),
     check('lastName').isString().notEmpty(),
     check('email').normalizeEmail().isEmail(),
-    check('password').isString().notEmpty(),
-    check('licensePlate').isLength({ min: 6, max: 6 }),
   ],
   userController.updateUserProfile
 );
