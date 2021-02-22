@@ -11,6 +11,7 @@ const HttpError = require('./utils/HttpError');
 
 // routers
 const userRoutes = require('./routes/userRoutes');
+const meterRoutes = require('./routes/meterRoutes');
 
 // connect to db
 LOG.info('⌛connecting to', config.MONGODB_URI);
@@ -80,6 +81,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/user', userRoutes);
+app.use('/api/meter', meterRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError('Route not found', 404);
