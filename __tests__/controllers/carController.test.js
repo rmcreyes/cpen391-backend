@@ -4,7 +4,7 @@ const http = require('http');
 
 const app = require('../../app');
 
-describe('Authentication Tests', () => {
+describe('Car Tests', () => {
   let server, api;
   beforeAll(done => {
     server = http.createServer(app);
