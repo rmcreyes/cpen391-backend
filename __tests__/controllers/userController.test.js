@@ -15,9 +15,26 @@ describe('Authentication Tests', () => {
   it('422 should fail to sign up if inputs are invalid', async () => {
     const newUser = {
       firstName: 'TESTING',
-      lastName: 'TESTING',
       email: 'invalid_email',
       password: 'TESTING',
+    };
+
+    const res = await api.post('/api/user/signup').send(newUser);
+
+    expect(res.statusCode).toEqual(422);
+    expect(res.body.message).toEqual('Invalid inputs');
+  });
+
+  it('422 sign up fail too many parameters', async () => {
+    const newUser = {
+      firstName: 'TESTING',
+      lastName: "TESTING",
+      email: 'invalid_email',
+      password: 'TESTING',
+      something: "something",
+      something: "something",
+      something: "something",
+      something: "something"
     };
 
     const res = await api.post('/api/user/signup').send(newUser);
@@ -33,7 +50,6 @@ describe('Authentication Tests', () => {
       lastName: 'TESTING',
       email: 'testing@testing.com',
       password: 'TESTING',
-      licensePlate: '123ABC',
     };
 
     const res = await api.post('/api/user/signup').send(newUser);
@@ -53,7 +69,6 @@ describe('Authentication Tests', () => {
       lastName: 'TESTING',
       email: 'testing@testing.com',
       password: 'TESTING',
-      licensePlate: '123ABC',
     };
 
     const res = await api.post('/api/user/signup').send(existingUser);
