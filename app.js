@@ -12,6 +12,7 @@ const HttpError = require('./utils/HttpError');
 // routers
 const userRoutes = require('./routes/userRoutes');
 const meterRoutes = require('./routes/meterRoutes');
+const carRoutes = require('./routes/carRoutes');
 
 // connect to db
 LOG.info('⌛connecting to', config.MONGODB_URI);
@@ -65,7 +66,6 @@ app.get('/version', (req, res) => {
   res.status(200).json({ message: config.VERSION });
 });
 
-// routes
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -80,9 +80,12 @@ app.use((req, res, next) => {
   next();
 });
 
+// routes
 app.use('/api/user', userRoutes);
 app.use('/api/meter', meterRoutes);
+app.use('/api/car', carRoutes);
 
+// errors
 app.use((req, res, next) => {
   const error = new HttpError('Route not found', 404);
   return next(error);

@@ -13,7 +13,7 @@ const signup = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
-  const { firstName, lastName, email, password, licensePlate} = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   let hashedPassword;
   try {
@@ -28,7 +28,6 @@ const signup = async (req, res, next) => {
     lastName,
     email,
     password: hashedPassword,
-    licensePlate
   });
 
   try {
@@ -55,6 +54,9 @@ const signup = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const { email, password } = req.body;
 
   if (!email || !password)
@@ -99,6 +101,9 @@ const login = async (req, res, next) => {
 };
 
 const getUserProfile = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
   const { userId } = req.userData;
 
   let user;
@@ -117,13 +122,13 @@ const updateUserProfile = async (req, res, next) => {
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
   const { userId } = req.userData;
-  const { firstName, lastName, email, licensePlate } = req.body;
+  const { firstName, lastName, email } = req.body;
 
   let updatedUser;
   try {
     updatedUser = await User.findOneAndUpdate(
       { _id: userId },
-      { firstName, lastName, email, licensePlate },
+      { firstName, lastName, email },
       { new: true }
     );
   } catch (err) {

@@ -9,7 +9,12 @@ const userSchema = new Schema(
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    licensePlate: { type: String, required: true },
+    cars: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Car',
+      },
+    ],
   },
   { versionKey: false }
 );
