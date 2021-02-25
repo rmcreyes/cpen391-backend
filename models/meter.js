@@ -10,7 +10,7 @@ const meterSchema = new Schema(
     licensePlate: { type: String },
     carId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Car',
+      ref: 'Parking',
     },
   },
   { versionKey: false }

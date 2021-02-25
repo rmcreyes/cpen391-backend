@@ -5,13 +5,13 @@ const Schema = mongoose.Schema;
 
 const parkingSchema = new Schema(
   {
+    licensePlate: { type: String, required: true, unique: true },
     carId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Car',
       required: true,
       unique: true,
     },
-    licensePlate: { type: String, required: true, unique: true },
     meterId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Meter',
