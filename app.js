@@ -11,6 +11,7 @@ const HttpError = require('./utils/HttpError');
 
 // routers
 const userRoutes = require('./routes/userRoutes');
+const meterRoutes = require('./routes/meterRoutes');
 const carRoutes = require('./routes/carRoutes');
 
 // connect to db
@@ -81,6 +82,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use('/api/user', userRoutes);
+app.use('/api/meter', meterRoutes);
 app.use('/api/car', carRoutes);
 
 // errors
