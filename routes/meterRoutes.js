@@ -24,7 +24,8 @@ meterRouter.put(
   '/:meterId',
   [
     check('meterId').isMongoId().notEmpty(),
-    check('occupied').isBoolean().notEmpty(),
+    check('isOccupied').isBoolean().notEmpty(),
+    check('licensePlate').isLength({ min: 6, max: 6 })
   ],
   meterController.updateStatus
 );

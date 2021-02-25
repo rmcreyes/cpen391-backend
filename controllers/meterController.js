@@ -53,14 +53,17 @@ const updateStatus = async (req, res, next) => {
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
   const { meterId } = req.params;
-  const { occupied } = req.body;
-  if (!meterId || !occupied) return next(new HttpError('Invalid inputs', 422));
+  const { isOccupied, licensePlate } = req.body;
+  if (!meterId || !isOccupied || !licensePlate)
+    return next(new HttpError('Invalid inputs', 422));
 
   let updatedMeter;
   try {
+    // call parking api to create parking object and save
+
     updatedMeter = await Meter.findByIdAndUpdate(
       meterId,
-      { occupied: occupied },
+      { isOccupied: isOccupied },
       { new: true }
     );
   } catch (exception) {

@@ -4,9 +4,15 @@ const Schema = mongoose.Schema;
 
 const meterSchema = new Schema(
   {
-    unitPrice: { type: Number, required: true},
-    occupied: { type: Boolean, required: true, default: false },
+    unitPrice: { type: Number, required: true },
+    isOccupied: { type: Boolean, required: true, default: false },
     updated: { type: Date, default: Date.now },
+    licensePlate: { type: String, unique: true },
+    carId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Car',
+      unique: true,
+    },
   },
   { versionKey: false }
 );

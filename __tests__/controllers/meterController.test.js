@@ -40,7 +40,7 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(201);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
-    expect(res.body.occupied).toEqual(false);
+    expect(res.body.isOccupied).toEqual(false);
     expect(res.body.updated).toBeTruthy();
     expect(res.body.id).toBeTruthy();
 
@@ -52,17 +52,19 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
-    expect(res.body.occupied).toEqual(false);
+    expect(res.body.isOccupied).toEqual(false);
     expect(res.body.updated).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
 
   it('200 update meter status', async () => {
-    const res = await api.put(`/api/meter/${newMeter.id}`).send({ occupied: true });
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: true, licensePlate: '123ABC' });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
-    expect(res.body.occupied).toEqual(true);
+    expect(res.body.isOccupied).toEqual(true);
     expect(res.body.updated).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
@@ -72,7 +74,7 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
-    expect(res.body.occupied).toEqual(true);
+    expect(res.body.isOccupied).toEqual(true);
     expect(res.body.updated).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
