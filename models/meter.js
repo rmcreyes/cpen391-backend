@@ -7,11 +7,10 @@ const meterSchema = new Schema(
     unitPrice: { type: Number, required: true },
     isOccupied: { type: Boolean, required: true, default: false },
     updated: { type: Date, default: Date.now },
-    licensePlate: { type: String, unique: true },
+    licensePlate: { type: String },
     carId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Car',
-      unique: true,
     },
   },
   { versionKey: false }

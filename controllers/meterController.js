@@ -54,7 +54,7 @@ const updateStatus = async (req, res, next) => {
 
   const { meterId } = req.params;
   const { isOccupied, licensePlate } = req.body;
-  if (!meterId || !isOccupied || !licensePlate)
+  if (!meterId || !licensePlate)
     return next(new HttpError('Invalid inputs', 422));
 
   let updatedMeter;
