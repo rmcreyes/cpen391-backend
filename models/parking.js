@@ -6,11 +6,15 @@ const Schema = mongoose.Schema;
 const parkingSchema = new Schema(
   {
     licensePlate: { type: String, required: true, unique: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: undefined
+    },
     carId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Car',
-      required: true,
-      unique: true,
+      default: undefined
     },
     meterId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -18,11 +22,11 @@ const parkingSchema = new Schema(
       required: true,
       unique: true,
     },
-    startTime: { type: Date, required: true },
+    startTime: { type: Date, default: Date.now },
     endTime: { type: Date },
-    isParked: { type: Boolean, required: true },
+    isParked: { type: Boolean, default: true },
     cost: { type: Number },
-    paid: { type: Boolean },
+    paid: { type: Boolean, default: false },
   },
   { versionKey: false }
 );

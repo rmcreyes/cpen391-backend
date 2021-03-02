@@ -6,12 +6,13 @@ const meterSchema = new Schema(
   {
     unitPrice: { type: Number, required: true },
     isOccupied: { type: Boolean, required: true, default: false },
-    updated: { type: Date, default: Date.now },
     licensePlate: { type: String },
-    carId: {
+    parkingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Parking',
+      default: undefined
     },
+    updated: { type: Date, default: Date.now },
   },
   { versionKey: false }
 );
