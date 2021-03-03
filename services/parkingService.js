@@ -1,33 +1,101 @@
 require('dotenv').config();
+
 const LOG = require('../utils/logger');
+
 const Meter = require('../models/meter');
 const Car = require('../models/car');
 const User = require('../models/user');
 const Parking = require('../models/parking');
 
-const createParking = async (licensePlate, userId, carId, meterId) => {
-  let savedParking;
+const createParking = async (req, licensePlate, meterId) => {
+  let savedCar;
+  try {
+    savedCar = await Car.findOne({ licensePlate: licensePlate });
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find car failed',
+      code: 500
+    };
+  }
+
+  // TODO: what if sent the same create parking twice? 
+  // Need to check meterId, licensePlate, carId
+  // Or... check in Meter.isOccupied?
+  // if request.isOccupied == true && Meter.isOccupied == true
+  // and request.licensePlate === Meter.licensePlate
+  // then no need to create new parking! 
+
+  let newParking;
   try {
     const parking = new Parking({
       licensePlate: licensePlate,
-      userId: userId,
-      carId: carId,
+      userId: savedCar.userId ? savedCar.userId : undefined,
+      carId: savedCar.id ? savedCar.id : undefined,
       meterId: meterId,
     });
 
-    savedParking = await parking.save();
+    newParking = await parking.save();
   } catch (exception) {
+    LOG.error(req._id, exception.message);
     return {
-      success: false
+      success: false,
+      message: 'Adding parking failed',
+      code: 500
     };
   }
 
   return {
     success: true,
-    parkingId: savedParking.id
+    parkingId: newParking.id,
   };
-}
+};
+
+const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
+  let savedParking;
+  try {
+    savedParking = await Parking.findById(parkingId);
+    if (!savedParking) {
+      return {
+        success: false,
+        message: 'Not found parking',
+        code: 404
+      };
+    }
+
+    if (savedParking.licensePlate !== licensePlate) {
+      return {
+        success: false,
+        message: 'Parking license plate not matched',
+        code: 404
+      };
+    }
+
+    savedParking.isParked = false;
+    savedParking.endTime = Date.now();
+    savedParking.cost =
+      unitPrice *
+      Math.ceil(
+        (savedParking.endTime - savedParking.startTime) / (1000 * 3600)
+      );
+
+    await savedParking.save();
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find parking failed',
+      code: 500
+    };
+  }
+
+  return {
+    success: true,
+  };
+};
 
 module.exports = {
-  createParking
+  createParking,
+  leaveParking,
 };

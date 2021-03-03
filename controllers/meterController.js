@@ -48,7 +48,7 @@ const getStatus = async (req, res, next) => {
     return next(new HttpError('Getting status failed', 500));
   }
 
-  if (!savedMeter) return next(new HttpError('Invalid meter', 401));
+  if (!savedMeter) return next(new HttpError('Meter not found', 401));
 
   return res.status(200).json(savedMeter);
 };
@@ -61,6 +61,15 @@ const updateStatus = async (req, res, next) => {
   const { isOccupied, licensePlate } = req.body;
   if (!meterId || !licensePlate)
     return next(new HttpError('Invalid inputs', 422));
+
+  let savedMeter;
+  try {
+    savedMeter = await Meter.findById(meterId);
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Getting meter failed', 500));
+  }
+  if (!savedMeter) return next(new HttpError('Meter not found', 401));
 
   // TODO: call parking api to create parking object and save
 
@@ -78,45 +87,42 @@ const updateStatus = async (req, res, next) => {
   //    else this license plate is different
   //        not possible, since parked car MUST leave before another car can be parked
 
-  let savedParking;
   if (isOccupied) {
-    let savedCar;
-    try {
-      savedCar = await Car.findOne({ licensePlate: licensePlate });
-    } catch (exception) {
-      LOG.error(req._id, exception.message);
-      return next(new HttpError('Find car failed', 500));
-    }
-
-    savedParking = await ParkingService.createParking(
+    const result = await ParkingService.createParking(
+      req,
       licensePlate,
-      savedCar.userId ? savedCar.userId : undefined,
-      savedCar.id ? savedCar.userId : undefined,
       meterId
     );
 
-    if (!savedParking.success)
-      return next(new HttpError('Adding parking failed', 500));
+    if (!result.success) return next(new HttpError(result.message, result.code));
+
+    savedMeter.licensePlate = licensePlate;
+    savedMeter.parkingId = result.parkingId;
   } else {
+    if (savedMeter.licensePlate !== licensePlate)
+      return next(new HttpError('Error: existing parked car', 409));
+
+    const result = await ParkingService.leaveParking(
+      req,
+      savedMeter.parkingId,
+      savedMeter.licensePlate,
+      savedMeter.unitPrice
+    );
+    if (!result.success) return next(new HttpError(result.message, result.code));
+
+    savedMeter.licensePlate = undefined;
+    savedMeter.parkingId = undefined;
   }
 
-  let updatedMeter;
   try {
-    updatedMeter = await Meter.findByIdAndUpdate(
-      meterId,
-      {
-        isOccupied: isOccupied,
-        licensePlate: licensePlate,
-        parkingId: savedParking.parkingId,
-      },
-      { new: true }
-    );
+    savedMeter.isOccupied = isOccupied;
+    await savedMeter.save();
   } catch (exception) {
     LOG.error(req._id, exception.message);
-    return next(new HttpError('Updating status failed', 500));
+    return next(new HttpError('Updating meter failed', 500));
   }
 
-  return res.status(200).json(updatedMeter);
+  return res.status(200).json(savedMeter);
 };
 
 module.exports = {

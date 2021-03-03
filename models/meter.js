@@ -10,11 +10,10 @@ const meterSchema = new Schema(
     parkingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Parking',
-      default: undefined
+      default: undefined,
     },
-    updated: { type: Date, default: Date.now },
   },
-  { versionKey: false }
+  { timestamps: true, versionKey: false }
 );
 
 meterSchema.set('toJSON', {
