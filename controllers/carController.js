@@ -30,7 +30,7 @@ const getCars = async (req, res, next) => {
   if (!savedCars || savedCars.length === 0 || !Array.isArray(savedCars))
     return next(new HttpError('Not found', 404));
 
-  res.status(200).json({ cars: savedCars });
+  return res.status(200).json({ cars: savedCars });
 };
 
 const getCar = async (req, res, next) => {

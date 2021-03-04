@@ -5,6 +5,68 @@ const LOG = require('../utils/logger');
 const Car = require('../models/car');
 const Parking = require('../models/parking');
 
+const getCurrentParkings = async (req, userId) => {
+  let savedParkings;
+  try {
+    savedParkings = await Parking.find({ userId: userId, isParked: true });
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Finding parking failed',
+      code: 500,
+    };
+  }
+
+  if (
+    !savedParkings ||
+    savedParkings.length === 0 ||
+    !Array.isArray(savedParkings)
+  ) {
+    return {
+      success: false,
+      message: 'Not found currently parked',
+      code: 404,
+    };
+  }
+
+  return {
+    success: true,
+    currentParkings: savedParkings,
+  };
+};
+
+const getAllParkings = async (req, userId) => {
+  let savedParkings;
+  try {
+    savedParkings = await Parking.find({ userId: userId });
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Finding parking failed',
+      code: 500,
+    };
+  }
+
+  if (
+    !savedParkings ||
+    savedParkings.length === 0 ||
+    !Array.isArray(savedParkings)
+  ) {
+    return {
+      success: false,
+      message: 'Not found any parked',
+      code: 404,
+    };
+  }
+
+  return {
+    success: true,
+    allParkings: savedParkings,
+  };
+};
+
 const createParking = async (req, licensePlate, meterId) => {
   let savedCar;
   try {
@@ -14,16 +76,16 @@ const createParking = async (req, licensePlate, meterId) => {
     return {
       success: false,
       message: 'Find car failed',
-      code: 500
+      code: 500,
     };
   }
 
-  // TODO: what if sent the same create parking twice? 
+  // DONE: what if sent the same create parking twice?
   // Need to check meterId, licensePlate, carId
   // Or... check in Meter.isOccupied?
   // if request.isOccupied == true && Meter.isOccupied == true
   // and request.licensePlate === Meter.licensePlate
-  // then no need to create new parking! 
+  // then no need to create new parking!
 
   const parking = new Parking({
     licensePlate: licensePlate,
@@ -40,7 +102,7 @@ const createParking = async (req, licensePlate, meterId) => {
     return {
       success: false,
       message: 'Adding parking failed',
-      code: 500
+      code: 500,
     };
   }
 
@@ -58,7 +120,7 @@ const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
       return {
         success: false,
         message: 'Not found parking',
-        code: 404
+        code: 404,
       };
     }
 
@@ -66,7 +128,7 @@ const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
       return {
         success: false,
         message: 'Parking license plate not matched',
-        code: 404
+        code: 404,
       };
     }
 
@@ -84,7 +146,7 @@ const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
     return {
       success: false,
       message: 'Find parking failed',
-      code: 500
+      code: 500,
     };
   }
 
@@ -94,6 +156,8 @@ const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
 };
 
 module.exports = {
+  getCurrentParkings,
+  getAllParkings,
   createParking,
   leaveParking,
 };

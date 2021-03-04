@@ -13,6 +13,7 @@ const HttpError = require('./utils/HttpError');
 const userRoutes = require('./routes/userRoutes');
 const meterRoutes = require('./routes/meterRoutes');
 const carRoutes = require('./routes/carRoutes');
+const parkingRouter = require('./routes/parkingRoutes');
 
 // connect to db
 LOG.info('⌛connecting to', config.MONGODB_URI);
@@ -84,6 +85,7 @@ app.use((req, res, next) => {
 app.use('/api/user', userRoutes);
 app.use('/api/meter', meterRoutes);
 app.use('/api/car', carRoutes);
+app.use('/api/parking', parkingRouter);
 
 // errors
 app.use((req, res, next) => {
