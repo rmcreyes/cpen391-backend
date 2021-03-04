@@ -16,7 +16,7 @@ meterRouter.post(
 meterRouter.get(
   '/:meterId',
   [check('meterId').isMongoId().notEmpty()],
-  meterController.getStatus
+  meterController.getMeter
 );
 
 meterRouter.put(

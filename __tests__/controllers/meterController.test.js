@@ -41,7 +41,8 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(false);
-    expect(res.body.updated).toBeTruthy();
+    expect(res.body.createdAt).toBeTruthy();
+    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toBeTruthy();
 
     newMeter.id = res.body.id;
@@ -53,30 +54,62 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(false);
-    expect(res.body.updated).toBeTruthy();
+    expect(res.body.createdAt).toBeTruthy();
+    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
 
-  it('200 update meter status', async () => {
+  it('200 isOccupied: true', async () => {
     const res = await api
       .put(`/api/meter/${newMeter.id}`)
-      .send({ isOccupied: true, licensePlate: '123ABC' });
+      .send({ isOccupied: true, licensePlate: 'NOTNOT' });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(true);
-    expect(res.body.updated).toBeTruthy();
+    expect(res.body.createdAt).toBeTruthy();
+    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
 
-  it('200 get meter status', async () => {
-    const res = await api.get(`/api/meter/${newMeter.id}`);
+  it('401 meter is already occupied', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: true, licensePlate: '123123' });
 
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
-    expect(res.body.isOccupied).toEqual(true);
-    expect(res.body.updated).toBeTruthy();
-    expect(res.body.id).toEqual(newMeter.id);
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.message).toEqual('Error: meter is already occupied');
+  });
+
+  it('409 can not move parked car', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: false, licensePlate: '123123' });
+
+    expect(res.statusCode).toEqual(409);
+    expect(res.body.message).toEqual('Error: existing parked car');
+  });
+
+  it('200 isOccupied: false', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: false, licensePlate: 'NOTNOT' });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
+      expect(res.body.isOccupied).toEqual(false);
+      expect(res.body.createdAt).toBeTruthy();
+      expect(res.body.updatedAt).toBeTruthy();
+      expect(res.body.id).toEqual(newMeter.id);
+  });
+
+  it('401 meter is not occupied', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: false, licensePlate: '123321' });
+
+      expect(res.statusCode).toEqual(401);
+      expect(res.body.message).toEqual('Error: meter is not occupied');
   });
 
   afterAll(async done => {

@@ -1,14 +1,10 @@
 require('dotenv').config();
 
 const { validationResult } = require('express-validator');
-
 const LOG = require('../utils/logger');
-
 const HttpError = require('../utils/HttpError');
 
 const Meter = require('../models/meter');
-const Car = require('../models/car');
-const User = require('../models/user');
 
 const ParkingService = require('../services/parkingService');
 
@@ -33,7 +29,7 @@ const addMeter = async (req, res, next) => {
   return res.status(201).json(createdMeter);
 };
 
-const getStatus = async (req, res, next) => {
+const getMeter = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
@@ -71,7 +67,8 @@ const updateStatus = async (req, res, next) => {
   }
   if (!savedMeter) return next(new HttpError('Meter not found', 401));
 
-  // TODO: call parking api to create parking object and save
+  //#region
+  // DONE: call parking api to create parking object and save
 
   // if isOccupied == true && some license plate (new car parked)
   //    then
@@ -86,6 +83,13 @@ const updateStatus = async (req, res, next) => {
   //        have parkingId -> find parking object -> fill in endTime && cost && paid
   //    else this license plate is different
   //        not possible, since parked car MUST leave before another car can be parked
+  //#endregion
+
+  if (savedMeter.isOccupied && isOccupied)
+    return next(new HttpError('Error: meter is already occupied', 401));
+
+  if (!savedMeter.isOccupied && !isOccupied)
+    return next(new HttpError('Error: meter is not occupied', 401));
 
   if (isOccupied) {
     const result = await ParkingService.createParking(
@@ -94,12 +98,14 @@ const updateStatus = async (req, res, next) => {
       meterId
     );
 
-    if (!result.success) return next(new HttpError(result.message, result.code));
+    if (!result.success)
+      return next(new HttpError(result.message, result.code));
 
     savedMeter.licensePlate = licensePlate;
     savedMeter.parkingId = result.parkingId;
+
   } else {
-    if (savedMeter.licensePlate !== licensePlate)
+    if (savedMeter.licensePlate && savedMeter.licensePlate !== licensePlate)
       return next(new HttpError('Error: existing parked car', 409));
 
     const result = await ParkingService.leaveParking(
@@ -108,7 +114,8 @@ const updateStatus = async (req, res, next) => {
       savedMeter.licensePlate,
       savedMeter.unitPrice
     );
-    if (!result.success) return next(new HttpError(result.message, result.code));
+    if (!result.success)
+      return next(new HttpError(result.message, result.code));
 
     savedMeter.licensePlate = undefined;
     savedMeter.parkingId = undefined;
@@ -127,6 +134,6 @@ const updateStatus = async (req, res, next) => {
 
 module.exports = {
   addMeter,
-  getStatus,
+  getMeter,
   updateStatus,
 };

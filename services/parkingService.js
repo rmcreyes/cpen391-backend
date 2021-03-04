@@ -2,9 +2,7 @@ require('dotenv').config();
 
 const LOG = require('../utils/logger');
 
-const Meter = require('../models/meter');
 const Car = require('../models/car');
-const User = require('../models/user');
 const Parking = require('../models/parking');
 
 const createParking = async (req, licensePlate, meterId) => {
@@ -27,15 +25,15 @@ const createParking = async (req, licensePlate, meterId) => {
   // and request.licensePlate === Meter.licensePlate
   // then no need to create new parking! 
 
+  const parking = new Parking({
+    licensePlate: licensePlate,
+    userId: savedCar ? savedCar.userId : undefined,
+    carId: savedCar ? savedCar.id : undefined,
+    meterId: meterId,
+  });
+
   let newParking;
   try {
-    const parking = new Parking({
-      licensePlate: licensePlate,
-      userId: savedCar.userId ? savedCar.userId : undefined,
-      carId: savedCar.id ? savedCar.id : undefined,
-      meterId: meterId,
-    });
-
     newParking = await parking.save();
   } catch (exception) {
     LOG.error(req._id, exception.message);
