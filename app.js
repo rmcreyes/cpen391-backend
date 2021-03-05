@@ -16,7 +16,9 @@ const carRoutes = require('./routes/carRoutes');
 const parkingRouter = require('./routes/parkingRoutes');
 
 // connect to db
-LOG.info('⌛connecting to', config.MONGODB_URI);
+if (process.env.NODE_ENV !== 'production') {
+  LOG.info('⌛connecting to', config.MONGODB_URI);
+}
 
 mongoose
   .connect(config.MONGODB_URI, {

@@ -34,7 +34,10 @@ if (process.env.NODE_ENV === 'docker') {
 }
 
 LOG.info('🔢PORT:', PORT);
-LOG.info('🔢MONGODB_URI:', MONGODB_URI);
+
+if (process.env.NODE_ENV !== 'production') {
+  LOG.info('🔢MONGODB_URI:', MONGODB_URI);
+}
 
 module.exports = {
   PORT,
