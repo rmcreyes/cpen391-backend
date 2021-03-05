@@ -7,6 +7,8 @@ const meterRouter = express.Router();
 
 // meterRouter.use(auth);
 
+meterRouter.get('/all', meterController.getAllMeterStatus);
+
 meterRouter.post(
   '/addMeter',
   [check('unitPrice').isNumeric().notEmpty()],
@@ -24,7 +26,7 @@ meterRouter.put(
   [
     check('meterId').isMongoId().notEmpty(),
     check('isOccupied').isBoolean().notEmpty(),
-    check('licensePlate').isLength({ min: 6, max: 6 })
+    check('licensePlate').isLength({ min: 6, max: 6 }),
   ],
   meterController.updateStatus
 );

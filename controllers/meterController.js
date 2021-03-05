@@ -8,6 +8,21 @@ const Meter = require('../models/meter');
 
 const ParkingService = require('../services/parkingService');
 
+const getAllMeterStatus = async (req, res, next) => {
+  let savedMeters;
+  try {
+    savedMeters = await Meter.find();
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Getting status failed', 500));
+  }
+
+  if (!savedMeters || !Array.isArray(savedMeters) || !savedMeters.length)
+    return next(new HttpError('No meter found', 401));
+
+  return res.status(200).json(savedMeters);
+};
+
 const addMeter = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
@@ -133,6 +148,7 @@ const updateStatus = async (req, res, next) => {
 };
 
 module.exports = {
+  getAllMeterStatus,
   addMeter,
   getMeter,
   updateStatus,
