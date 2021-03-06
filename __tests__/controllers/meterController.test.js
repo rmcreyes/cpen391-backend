@@ -41,8 +41,6 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(false);
-    expect(res.body.createdAt).toBeTruthy();
-    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toBeTruthy();
 
     newMeter.id = res.body.id;
@@ -54,8 +52,6 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(false);
-    expect(res.body.createdAt).toBeTruthy();
-    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
 
@@ -67,8 +63,6 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(true);
-    expect(res.body.createdAt).toBeTruthy();
-    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
   });
 
@@ -98,8 +92,6 @@ describe('Meter Tests', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
       expect(res.body.isOccupied).toEqual(false);
-      expect(res.body.createdAt).toBeTruthy();
-      expect(res.body.updatedAt).toBeTruthy();
       expect(res.body.id).toEqual(newMeter.id);
   });
 
