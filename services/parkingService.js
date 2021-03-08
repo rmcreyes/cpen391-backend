@@ -5,10 +5,13 @@ const LOG = require('../utils/logger');
 const Car = require('../models/car');
 const Parking = require('../models/parking');
 
-const getCurrentParkings = async (req, userId) => {
+const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
   try {
-    savedParkings = await Parking.find({ userId: userId, isParked: true });
+    savedParkings = await Parking.find({
+      userId: userId,
+      isParked: getCurrent,
+    });
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return {
@@ -25,15 +28,22 @@ const getCurrentParkings = async (req, userId) => {
   ) {
     return {
       success: false,
-      message: 'Not found currently parked',
+      message: 'Not found any current previous',
       code: 404,
     };
   }
 
-  return {
-    success: true,
-    currentParkings: savedParkings,
-  };
+  if (getCurrent) {
+    return {
+      success: true,
+      currentParkings: savedParkings,
+    };
+  } else {
+    return {
+      success: true,
+      previousParkings: savedParkings,
+    };
+  }
 };
 
 const getAllParkings = async (req, userId) => {
@@ -157,7 +167,7 @@ const leaveParking = async (req, parkingId, licensePlate) => {
 };
 
 module.exports = {
-  getCurrentParkings,
+  getCurrentPreviousParkings,
   getAllParkings,
   createParking,
   leaveParking,

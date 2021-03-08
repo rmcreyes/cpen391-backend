@@ -15,6 +15,12 @@ parkingRouter.get(
 );
 
 parkingRouter.get(
+  '/:userId/previous',
+  [check('userId').isMongoId()],
+  parkingController.getPreviousParkings
+);
+
+parkingRouter.get(
   '/:userId/all',
   [check('userId').isMongoId()],
   parkingController.getAllParkings
