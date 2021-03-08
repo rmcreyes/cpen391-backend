@@ -23,6 +23,7 @@ const parkingSchema = new Schema(
     startTime: { type: Date, default: Date.now },
     endTime: { type: Date },
     isParked: { type: Boolean, default: true },
+    unitPrice: { type: Number, required: true },
     cost: { type: Number },
     paid: { type: Boolean, default: false },
   },

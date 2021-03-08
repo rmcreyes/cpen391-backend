@@ -110,7 +110,8 @@ const updateStatus = async (req, res, next) => {
     const result = await ParkingService.createParking(
       req,
       licensePlate,
-      meterId
+      meterId,
+      savedMeter.unitPrice
     );
 
     if (!result.success)
@@ -118,7 +119,6 @@ const updateStatus = async (req, res, next) => {
 
     savedMeter.licensePlate = licensePlate;
     savedMeter.parkingId = result.parkingId;
-
   } else {
     if (savedMeter.licensePlate && savedMeter.licensePlate !== licensePlate)
       return next(new HttpError('Error: existing parked car', 409));
@@ -126,8 +126,7 @@ const updateStatus = async (req, res, next) => {
     const result = await ParkingService.leaveParking(
       req,
       savedMeter.parkingId,
-      savedMeter.licensePlate,
-      savedMeter.unitPrice
+      savedMeter.licensePlate
     );
     if (!result.success)
       return next(new HttpError(result.message, result.code));

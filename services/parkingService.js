@@ -67,7 +67,7 @@ const getAllParkings = async (req, userId) => {
   };
 };
 
-const createParking = async (req, licensePlate, meterId) => {
+const createParking = async (req, licensePlate, meterId, unitPrice) => {
   let savedCar;
   try {
     savedCar = await Car.findOne({ licensePlate: licensePlate });
@@ -92,6 +92,7 @@ const createParking = async (req, licensePlate, meterId) => {
     userId: savedCar ? savedCar.userId : undefined,
     carId: savedCar ? savedCar.id : undefined,
     meterId: meterId,
+    unitPrice: unitPrice,
   });
 
   let newParking;
@@ -112,7 +113,7 @@ const createParking = async (req, licensePlate, meterId) => {
   };
 };
 
-const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
+const leaveParking = async (req, parkingId, licensePlate) => {
   let savedParking;
   try {
     savedParking = await Parking.findById(parkingId);
@@ -135,7 +136,7 @@ const leaveParking = async (req, parkingId, licensePlate, unitPrice) => {
     savedParking.isParked = false;
     savedParking.endTime = Date.now();
     savedParking.cost =
-      unitPrice *
+      savedParking.unitPrice *
       Math.ceil(
         (savedParking.endTime - savedParking.startTime) / (1000 * 3600)
       );
