@@ -2,7 +2,6 @@ const express = require('express');
 const { check } = require('express-validator');
 
 const meterController = require('../controllers/meterController');
-const auth = require('../middleware/auth');
 
 const meterRouter = express.Router();
 
@@ -19,7 +18,7 @@ meterRouter.post(
 meterRouter.get(
   '/:meterId',
   [check('meterId').isMongoId().notEmpty()],
-  meterController.getStatus
+  meterController.getMeter
 );
 
 meterRouter.put(

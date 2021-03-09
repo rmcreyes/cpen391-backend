@@ -22,15 +22,15 @@ const getCars = async (req, res, next) => {
   let savedCars;
   try {
     savedCars = await Car.find({ userId: userId });
-
-    if (!savedCars || savedCars.length === 0 || !Array.isArray(savedCars))
-      return next(new HttpError('Not found', 404));
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return next(new HttpError('Failed getting cars', 500));
   }
 
-  res.status(200).json({ cars: savedCars });
+  if (!savedCars || savedCars.length === 0 || !Array.isArray(savedCars))
+    return next(new HttpError('Not found', 404));
+
+  return res.status(200).json({ cars: savedCars });
 };
 
 const getCar = async (req, res, next) => {
@@ -46,19 +46,19 @@ const getCar = async (req, res, next) => {
   let savedCar;
   try {
     savedCar = await Car.findById(carId);
-
-    if (!savedCar) return next(new HttpError('Not found', 404));
-
-    if (!savedCar.userId || savedCar.userId != userId) {
-      LOG.error(req._id, 'Miss match userId and carId!');
-      return next(new HttpError('Invalid user car', 500));
-    }
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return next(new HttpError('Failed getting car', 500));
   }
 
-  res.status(200).json(savedCar);
+  if (!savedCar) return next(new HttpError('Not found', 404));
+
+  if (!savedCar.userId || savedCar.userId != userId) {
+    LOG.error(req._id, 'Miss match userId and carId!');
+    return next(new HttpError('Invalid user car', 500));
+  }
+
+  return res.status(200).json(savedCar);
 };
 
 const postCar = async (req, res, next) => {
@@ -167,9 +167,9 @@ const putCar = async (req, res, next) => {
   } catch (exception) {
     LOG.error(req._id, exception.message);
     if (exception.name === 'AssertionError')
-      next(new HttpError('Error updating car', 500));
+      return next(new HttpError('Error updating car', 500));
 
-    next(new HttpError('Failed updating car', 500));
+    return next(new HttpError('Failed updating car', 500));
   }
 };
 

@@ -6,14 +6,14 @@ const meterSchema = new Schema(
   {
     unitPrice: { type: Number, required: true },
     isOccupied: { type: Boolean, required: true, default: false },
-    updated: { type: Date, default: Date.now },
     licensePlate: { type: String },
-    carId: {
+    parkingId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Car',
+      ref: 'Parking',
+      default: undefined,
     },
   },
-  { versionKey: false }
+  { timestamps: true, versionKey: false }
 );
 
 meterSchema.set('toJSON', {
@@ -21,6 +21,8 @@ meterSchema.set('toJSON', {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
+    delete returnedObject.createdAt;
+    delete returnedObject.updatedAt;
   },
 });
 
