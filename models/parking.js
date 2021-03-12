@@ -21,6 +21,7 @@ const parkingSchema = new Schema(
       required: true,
     },
     startTime: { type: Date, default: Date.now },
+    isConfirmed: { type: Boolean, default: false, required: true },
     endTime: { type: Date },
     isParked: { type: Boolean, default: true },
     unitPrice: { type: Number, required: true },

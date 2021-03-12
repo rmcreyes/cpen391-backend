@@ -64,6 +64,7 @@ describe('Meter Tests', () => {
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(true);
     expect(res.body.id).toEqual(newMeter.id);
+    expect(res.body.parkingId).toBeTruthy();
   });
 
   it('401 meter is already occupied', async () => {
@@ -93,6 +94,7 @@ describe('Meter Tests', () => {
       expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
       expect(res.body.isOccupied).toEqual(false);
       expect(res.body.id).toEqual(newMeter.id);
+      expect(res.body.parkingId).not.toBeTruthy();
   });
 
   it('401 meter is not occupied', async () => {

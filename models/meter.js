@@ -19,6 +19,9 @@ const meterSchema = new Schema(
 meterSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
+    returnedObject.parkingId = returnedObject.parkingId
+      ? returnedObject.parkingId.toString()
+      : undefined;
     delete returnedObject._id;
     delete returnedObject.__v;
     delete returnedObject.createdAt;
