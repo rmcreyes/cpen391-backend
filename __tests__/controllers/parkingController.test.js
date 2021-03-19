@@ -3,6 +3,7 @@ const supertest = require('supertest');
 const http = require('http');
 
 const app = require('../../app');
+const parking = require('../../models/parking');
 
 describe('Meter Tests', () => {
   let server, api;
@@ -98,6 +99,7 @@ describe('Meter Tests', () => {
   /* ====================================================================================================================================================
    */
 
+  let parkingId;
   it('200 isOccupied: true', async () => {
     const res = await api
       .put(`/api/meter/${newMeter.id}`)
@@ -106,7 +108,19 @@ describe('Meter Tests', () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(true);
+    expect(res.body.parkingId).toBeTruthy();
     expect(res.body.id).toEqual(newMeter.id);
+
+    parkingId = res.body.parkingId;
+  });
+
+  it('200 confirmed', async () => {
+    const res = await api
+      .put(`/api/parking/confirm/${parkingId}`)
+      .send({ isNew: false, licensePlate: carOne.licensePlate });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.parkingId).toEqual(parkingId);
   });
 
   it('200 get current parkings', async () => {
