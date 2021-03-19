@@ -59,9 +59,9 @@ const confirmParking = async (req, res, next) => {
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
   const { parkingId } = req.params;
-  const { newLicensePlate } = req.body;
+  const { isNew, licensePlate } = req.body;
 
-  const result = await ParkingService.confirmLicensePlate(req, parkingId, newLicensePlate);
+  const result = await ParkingService.confirmLicensePlate(req, parkingId, isNew, licensePlate);
   if (!result.success) return next(new HttpError(result.message, result.code));
 
   delete result.success;

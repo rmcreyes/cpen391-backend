@@ -165,14 +165,36 @@ const leaveParking = async (req, parkingId, licensePlate) => {
 
   return {
     success: true,
-    cost: savedParking.cost
+    cost: savedParking.cost,
   };
 };
 
-const confirmLicensePlate = async (req, parkingId, newLicensePlate) => {
+const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
+  if (!isNew) {
+    try {
+      const newParking = await Parking.findByIdAndUpdate(
+        parkingId,
+        { isConfirmed: true },
+        { new: true }
+      );
+
+      return {
+        success: true,
+        parkingId: newParking.id,
+      };
+    } catch (exception) {
+      LOG.error(req._id, exception.message);
+      return {
+        success: false,
+        message: 'Update parking failed',
+        code: 500,
+      };
+    }
+  }
+
   let savedCar;
   try {
-    savedCar = await Car.findOne({ licensePlate: newLicensePlate });
+    savedCar = await Car.findOne({ licensePlate: licensePlate });
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return {
@@ -187,7 +209,7 @@ const confirmLicensePlate = async (req, parkingId, newLicensePlate) => {
     newParking = await Parking.findByIdAndUpdate(
       parkingId,
       {
-        licensePlate: newLicensePlate,
+        licensePlate: licensePlate,
         isConfirmed: true,
         userId: savedCar ? savedCar.userId : undefined,
         carId: savedCar ? savedCar.id : undefined,
@@ -197,9 +219,7 @@ const confirmLicensePlate = async (req, parkingId, newLicensePlate) => {
 
     await Meter.findByIdAndUpdate(
       newParking.meterId,
-      {
-        licensePlate: newLicensePlate,
-      },
+      { licensePlate: licensePlate },
       { new: true }
     );
   } catch (exception) {
