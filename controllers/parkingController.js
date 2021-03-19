@@ -1,9 +1,7 @@
 require('dotenv').config();
-
 const { validationResult } = require('express-validator');
 
 const LOG = require('../utils/logger');
-
 const HttpError = require('../utils/HttpError');
 
 const ParkingService = require('../services/parkingService');
@@ -56,8 +54,24 @@ const getAllParkings = async (req, res, next) => {
   return res.status(200).json(result);
 };
 
+const confirmParking = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
+  const { parkingId } = req.params;
+  const { newLicensePlate } = req.body;
+
+  const result = await ParkingService.confirmLicensePlate(req, parkingId, newLicensePlate);
+  if (!result.success) return next(new HttpError(result.message, result.code));
+
+  delete result.success;
+
+  return res.status(200).json(result);
+}
+
 module.exports = {
   getCurrentParkings,
   getPreviousParkings,
-  getAllParkings
+  getAllParkings,
+  confirmParking
 };

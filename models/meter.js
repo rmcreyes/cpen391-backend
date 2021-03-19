@@ -12,6 +12,7 @@ const meterSchema = new Schema(
       ref: 'Parking',
       default: undefined,
     },
+    cost: { type: Number },
   },
   { timestamps: true, versionKey: false }
 );

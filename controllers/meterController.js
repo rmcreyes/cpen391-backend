@@ -119,6 +119,7 @@ const updateStatus = async (req, res, next) => {
 
     savedMeter.licensePlate = licensePlate;
     savedMeter.parkingId = result.parkingId;
+    savedMeter.cost = undefined;
   } else {
     if (savedMeter.licensePlate && savedMeter.licensePlate !== licensePlate)
       return next(new HttpError('Error: existing parked car', 409));
@@ -133,6 +134,7 @@ const updateStatus = async (req, res, next) => {
 
     savedMeter.licensePlate = undefined;
     savedMeter.parkingId = undefined;
+    savedMeter.cost = result.cost;
   }
 
   try {
