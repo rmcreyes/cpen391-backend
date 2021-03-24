@@ -4,6 +4,7 @@ const LOG = require('../utils/logger');
 
 const Car = require('../models/car');
 const Parking = require('../models/parking');
+const Meter = require('../models/meter');
 
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
@@ -11,6 +12,7 @@ const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
     savedParkings = await Parking.find({
       userId: userId,
       isParked: getCurrent,
+      isConfirmed: true,
     });
   } catch (exception) {
     LOG.error(req._id, exception.message);
@@ -163,6 +165,82 @@ const leaveParking = async (req, parkingId, licensePlate) => {
 
   return {
     success: true,
+    cost: savedParking.cost,
+  };
+};
+
+const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
+  if (!isNew) {
+    try {
+      const newParking = await Parking.findByIdAndUpdate(
+        parkingId,
+        { isConfirmed: true },
+        { new: true }
+      );
+
+      return {
+        success: true,
+        parkingId: newParking.id,
+      };
+    } catch (exception) {
+      LOG.error(req._id, exception.message);
+      return {
+        success: false,
+        message: 'Update parking failed',
+        code: 500,
+      };
+    }
+  }
+
+  let savedCar;
+  try {
+    savedCar = await Car.findOne({ licensePlate: licensePlate });
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find car failed',
+      code: 500,
+    };
+  }
+
+  let newParking;
+  try {
+    newParking = await Parking.findByIdAndUpdate(
+      parkingId,
+      {
+        licensePlate: licensePlate,
+        isConfirmed: true,
+        userId: savedCar ? savedCar.userId : undefined,
+        carId: savedCar ? savedCar.id : undefined,
+      },
+      { new: true }
+    );
+
+    await Meter.findByIdAndUpdate(
+      newParking.meterId,
+      { licensePlate: licensePlate },
+      { new: true }
+    );
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Update parking failed',
+      code: 500,
+    };
+  }
+
+  if (!newParking)
+    return {
+      success: false,
+      message: 'Update parking unknown error',
+      code: 500,
+    };
+
+  return {
+    success: true,
+    parkingId: newParking.id,
   };
 };
 
@@ -171,4 +249,5 @@ module.exports = {
   getAllParkings,
   createParking,
   leaveParking,
+  confirmLicensePlate,
 };

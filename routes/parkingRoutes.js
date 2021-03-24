@@ -6,6 +6,16 @@ const auth = require('../middleware/auth');
 
 const parkingRouter = express.Router();
 
+parkingRouter.put(
+  '/confirm/:parkingId',
+  [
+    check('parkingId').isMongoId(),
+    check('isNew').isBoolean(),
+    check('licensePlate').isLength({ min: 6, max: 6 }),
+  ],
+  parkingController.confirmParking
+);
+
 parkingRouter.use(auth);
 
 parkingRouter.get(
