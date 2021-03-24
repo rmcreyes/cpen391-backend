@@ -178,6 +178,12 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
         { new: true }
       );
 
+      await Meter.findByIdAndUpdate(
+        newParking.meterId,
+        { isConfirmed: newParking.isConfirmed },
+        { new: true }
+      );
+
       return {
         success: true,
         parkingId: newParking.id,
@@ -219,7 +225,7 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
 
     await Meter.findByIdAndUpdate(
       newParking.meterId,
-      { licensePlate: licensePlate },
+      { licensePlate: licensePlate, isConfirmed: newParking.isConfirmed },
       { new: true }
     );
   } catch (exception) {
