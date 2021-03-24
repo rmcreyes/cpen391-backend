@@ -7,7 +7,7 @@ const HttpError = require('../utils/HttpError');
 const Meter = require('../models/meter');
 
 const ParkingService = require('../services/parkingService');
-const { sendHook } = require('../webhook/webhook');
+const { meterStatusChangeHook } = require('../webhook/webhook');
 
 const getAllMeterStatus = async (req, res, next) => {
   let savedMeters;
@@ -147,7 +147,7 @@ const updateStatus = async (req, res, next) => {
     return next(new HttpError('Updating meter failed', 500));
   }
 
-  sendHook(savedMeter);
+  meterStatusChangeHook(savedMeter);
 
   return res.status(200).json(savedMeter);
 };

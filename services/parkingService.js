@@ -6,6 +6,8 @@ const Car = require('../models/car');
 const Parking = require('../models/parking');
 const Meter = require('../models/meter');
 
+const { parkingConfirmationHook } = require('../webhook/webhook');
+
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
   try {
@@ -118,6 +120,24 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
       code: 500,
     };
   }
+
+  // alert admin if not confirmed within time minutes
+  setTimeout(
+    async parkingId => {
+      let savedParking;
+      try {
+        savedParking = await Parking.findById(parkingId);
+      } catch (exception) {
+        LOG.error(req._id, exception.message);
+      }
+
+      if (!savedParking.isConfirmed) {
+        parkingConfirmationHook(savedParking);
+      }
+    },
+    process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+    newParking.id
+  );
 
   return {
     success: true,
