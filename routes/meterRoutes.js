@@ -21,6 +21,12 @@ meterRouter.get(
   meterController.getMeter
 );
 
+meterRouter.post(
+  '/:meterId/reset',
+  [check('meterId').isMongoId().notEmpty()],
+  meterController.resetMeter
+);
+
 meterRouter.put(
   '/:meterId',
   [
