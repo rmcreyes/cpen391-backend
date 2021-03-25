@@ -45,6 +45,35 @@ const addMeter = async (req, res, next) => {
   return res.status(201).json(createdMeter);
 };
 
+const resetMeter = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
+
+  const { meterId } = req.params;
+  if (!meterId) return next(new HttpError('Invalid inputs', 422));
+
+  let savedMeter;
+  try {
+    savedMeter = await Meter.findByIdAndUpdate(
+      meterId,
+      {
+        isOccupied: false,
+        licensePlate: undefined,
+        parkingId: undefined,
+        cost: undefined,
+      },
+      { new: true }
+    );
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return next(new HttpError('Getting status failed', 500));
+  }
+
+  if (!savedMeter) return next(new HttpError('Meter not found', 401));
+
+  return res.status(200).json(savedMeter);
+};
+
 const getMeter = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
@@ -155,6 +184,7 @@ const updateStatus = async (req, res, next) => {
 module.exports = {
   getAllMeterStatus,
   addMeter,
+  resetMeter,
   getMeter,
   updateStatus,
 };
