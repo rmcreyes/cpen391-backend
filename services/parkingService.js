@@ -6,6 +6,8 @@ const Car = require('../models/car');
 const Parking = require('../models/parking');
 const Meter = require('../models/meter');
 
+const { parkingConfirmationHook } = require('../webhook/webhook');
+
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
   try {
@@ -119,6 +121,24 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
     };
   }
 
+  // alert admin if not confirmed within time minutes
+  setTimeout(
+    async parkingId => {
+      let savedParking;
+      try {
+        savedParking = await Parking.findById(parkingId);
+      } catch (exception) {
+        LOG.error(req._id, exception.message);
+      }
+
+      if (!savedParking.isConfirmed) {
+        parkingConfirmationHook(savedParking);
+      }
+    },
+    process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+    newParking.id
+  );
+
   return {
     success: true,
     parkingId: newParking.id,
@@ -178,6 +198,12 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
         { new: true }
       );
 
+      await Meter.findByIdAndUpdate(
+        newParking.meterId,
+        { isConfirmed: newParking.isConfirmed },
+        { new: true }
+      );
+
       return {
         success: true,
         parkingId: newParking.id,
@@ -219,7 +245,7 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
 
     await Meter.findByIdAndUpdate(
       newParking.meterId,
-      { licensePlate: licensePlate },
+      { licensePlate: licensePlate, isConfirmed: newParking.isConfirmed },
       { new: true }
     );
   } catch (exception) {

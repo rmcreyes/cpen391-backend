@@ -7,6 +7,7 @@ const HttpError = require('../utils/HttpError');
 const Meter = require('../models/meter');
 
 const ParkingService = require('../services/parkingService');
+const { meterStatusChangeHook } = require('../webhook/webhook');
 
 const getAllMeterStatus = async (req, res, next) => {
   let savedMeters;
@@ -135,6 +136,7 @@ const updateStatus = async (req, res, next) => {
     savedMeter.licensePlate = undefined;
     savedMeter.parkingId = undefined;
     savedMeter.cost = result.cost;
+    savedMeter.isConfirmed = false;
   }
 
   try {
@@ -144,6 +146,8 @@ const updateStatus = async (req, res, next) => {
     LOG.error(req._id, exception.message);
     return next(new HttpError('Updating meter failed', 500));
   }
+
+  meterStatusChangeHook(savedMeter);
 
   return res.status(200).json(savedMeter);
 };
