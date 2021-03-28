@@ -81,7 +81,13 @@ const getAllParkings = async (req, userId) => {
   };
 };
 
-const createParking = async (req, licensePlate, meterId, unitPrice) => {
+const createParking = async (
+  req,
+  licensePlate,
+  meterId,
+  unitPrice,
+  isConfirmed
+) => {
   let savedCar;
   try {
     savedCar = await Car.findOne({ licensePlate: licensePlate });
@@ -107,6 +113,7 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
     carId: savedCar ? savedCar.id : undefined,
     meterId: meterId,
     unitPrice: unitPrice,
+    isConfirmed: isConfirmed ? true : false,
   });
 
   let newParking;
@@ -122,22 +129,24 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
   }
 
   // alert admin if not confirmed within time minutes
-  setTimeout(
-    async parkingId => {
-      let savedParking;
-      try {
-        savedParking = await Parking.findById(parkingId);
-      } catch (exception) {
-        LOG.error(req._id, exception.message);
-      }
+  if (!newParking.isConfirmed) {
+    setTimeout(
+      async parkingId => {
+        let savedParking;
+        try {
+          savedParking = await Parking.findById(parkingId);
+        } catch (exception) {
+          LOG.error(req._id, exception.message);
+        }
 
-      if (!savedParking.isConfirmed) {
-        parkingConfirmationHook(savedParking);
-      }
-    },
-    process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
-    newParking.id
-  );
+        if (!savedParking.isConfirmed) {
+          parkingConfirmationHook(savedParking);
+        }
+      },
+      process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+      newParking.id
+    );
+  }
 
   return {
     success: true,
@@ -245,7 +254,7 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
 
     await Meter.findByIdAndUpdate(
       newParking.meterId,
-      { licensePlate: licensePlate, isConfirmed: newParking.isConfirmed },
+      { licensePlate: licensePlate },
       { new: true }
     );
   } catch (exception) {

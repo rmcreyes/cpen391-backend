@@ -21,10 +21,12 @@ const parkingConfirmationHook = async savedParking => {
 };
 
 const sendHook = async (url, body) => {
-  try {
-    await axios.post(url, body);
-  } catch (exception) {
-    LOG.error('Discord webhook failed', exception);
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      await axios.post(url, body);
+    } catch (exception) {
+      LOG.error('Discord webhook failed', exception);
+    }
   }
 
   return;
