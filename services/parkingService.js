@@ -151,6 +151,7 @@ const createParking = async (
   return {
     success: true,
     parkingId: newParking.id,
+    isUser: newParking.userId ? true : false
   };
 };
 

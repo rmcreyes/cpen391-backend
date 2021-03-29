@@ -136,6 +136,7 @@ const updateStatus = async (req, res, next) => {
   if (!savedMeter.isOccupied && !isOccupied)
     return next(new HttpError('Error: meter is not occupied', 401));
 
+  let isUser;
   if (isOccupied) {
     const result = await ParkingService.createParking(
       req,
@@ -151,6 +152,7 @@ const updateStatus = async (req, res, next) => {
     savedMeter.licensePlate = licensePlate;
     savedMeter.parkingId = result.parkingId;
     savedMeter.cost = undefined;
+    isUser = result.isUser;
   } else {
     if (savedMeter.licensePlate && savedMeter.licensePlate !== licensePlate)
       return next(new HttpError('Error: existing parked car', 409));
@@ -176,9 +178,10 @@ const updateStatus = async (req, res, next) => {
     return next(new HttpError('Updating meter failed', 500));
   }
 
-  meterStatusChangeHook(savedMeter);
-
-  return res.status(200).json(savedMeter);
+  // meterStatusChangeHook(savedMeter);
+  return res
+    .status(200)
+    .json({ ...JSON.parse(JSON.stringify(savedMeter)), isUser });
 };
 
 module.exports = {
