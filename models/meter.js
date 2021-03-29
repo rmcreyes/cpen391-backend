@@ -7,7 +7,6 @@ const meterSchema = new Schema(
     unitPrice: { type: Number, required: true },
     isOccupied: { type: Boolean, required: true, default: false },
     licensePlate: { type: String },
-    isConfirmed: { type: Boolean, default: false },
     parkingId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Parking',

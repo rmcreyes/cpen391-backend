@@ -38,6 +38,7 @@ parkingSchema.set('toJSON', {
     delete returnedObject.__v;
     delete returnedObject.createdAt;
     delete returnedObject.updatedAt;
+    delete returnedObject.isConfirmed;
   },
 });
 

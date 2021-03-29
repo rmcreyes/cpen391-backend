@@ -18,11 +18,7 @@ const buildMeterStatusChangeMessage = savedMeter => {
     value: savedMeter.licensePlate ? savedMeter.licensePlate : 'None',
     inline: true,
   };
-  const isConfirmed = {
-    name: 'isConfirmed',
-    value: savedMeter.isConfirmed ? savedMeter.isConfirmed : 'None',
-    inline: true,
-  };
+
   const parkingId = {
     name: 'parkingId',
     value: savedMeter.parkingId ? savedMeter.parkingId : 'None',
@@ -41,7 +37,6 @@ const buildMeterStatusChangeMessage = savedMeter => {
     unitPrice,
     isOccupied,
     licensePlate,
-    isConfirmed,
     parkingId,
     cost,
   ];

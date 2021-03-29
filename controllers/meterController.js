@@ -99,7 +99,7 @@ const updateStatus = async (req, res, next) => {
   if (!errors.isEmpty()) return next(new HttpError('Invalid inputs', 422));
 
   const { meterId } = req.params;
-  const { isOccupied, licensePlate } = req.body;
+  const { isOccupied, licensePlate, isConfirmed } = req.body;
   if (!meterId || !licensePlate)
     return next(new HttpError('Invalid inputs', 422));
 
@@ -141,7 +141,8 @@ const updateStatus = async (req, res, next) => {
       req,
       licensePlate,
       meterId,
-      savedMeter.unitPrice
+      savedMeter.unitPrice,
+      isConfirmed
     );
 
     if (!result.success)
@@ -165,7 +166,6 @@ const updateStatus = async (req, res, next) => {
     savedMeter.licensePlate = undefined;
     savedMeter.parkingId = undefined;
     savedMeter.cost = result.cost;
-    savedMeter.isConfirmed = false;
   }
 
   try {
