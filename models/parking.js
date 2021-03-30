@@ -32,7 +32,7 @@ const parkingSchema = new Schema(
       require: true,
       default: undefined
     },
-    paid: { type: Boolean, default: false },
+    isPaid: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

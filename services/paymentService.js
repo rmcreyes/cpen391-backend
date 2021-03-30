@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const axios = require('axios').default;
+
 const LOG = require('../utils/logger');
 
 const Car = require('../models/car');
@@ -46,11 +48,46 @@ const createPayment = async (req, isUser, userId, cardNum, expDate, cvv) => {
 
   return {
     success: true,
-    paymentId: newPayment.id
-  }
+    paymentId: newPayment.id,
+  };
 };
 
+const authorizePayment = async (req, paymentId) => {
+  let savedPayment;
+  try {
+    savedPayment = Payment.findById(paymentId);
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find payment failed',
+      code: 500,
+    };
+  }
+
+  const body = {
+    cardNum: savedPayment.cardNum,
+    expDate: savedPayment.expDate,
+    cvv: savedPayment.cvv,
+  };
+
+  const url = `${process.env.PAYMENT_AUTH_URL}?mocky-delay=${process.env.PAYMENT_AUTH_DELAY}ms`;
+
+  let response;
+  try {
+    response = await axios.post(url, body);
+  } catch (exception) {
+    return {
+      success: false,
+      message: 'Payment authorization failed',
+      code: 401,
+    };
+  }
+
+  return response.data;
+};
 
 module.exports = {
-  createPayment
-}
+  createPayment,
+  authorizePayment,
+};

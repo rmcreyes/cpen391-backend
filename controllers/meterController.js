@@ -125,7 +125,7 @@ const updateStatus = async (req, res, next) => {
   // if isOccupied == false && some license plate (parked car leaving)
   //    then
   //    if this license plate is the same one in DB
-  //        have parkingId -> find parking object -> fill in endTime && cost && paid
+  //        have parkingId -> find parking object -> fill in endTime && cost && isPaid
   //    else this license plate is different
   //        not possible, since parked car MUST leave before another car can be parked
   //#endregion

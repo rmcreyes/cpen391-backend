@@ -7,6 +7,7 @@ const Parking = require('../models/parking');
 const Meter = require('../models/meter');
 
 const { parkingConfirmationHook, paymentHook } = require('../webhook/webhook');
+const PaymentService = require('./paymentService');
 
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
@@ -191,23 +192,52 @@ const leaveParking = async (req, parkingId, licensePlate) => {
         code: 404,
       };
     }
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find parking failed',
+      code: 500,
+    };
+  }
 
-    if (savedParking.licensePlate !== licensePlate) {
-      return {
-        success: false,
-        message: 'Parking license plate not matched',
-        code: 404,
-      };
-    }
+  if (savedParking.licensePlate !== licensePlate) {
+    return {
+      success: false,
+      message: 'Parking license plate not matched',
+      code: 404,
+    };
+  }
 
-    savedParking.isParked = false;
-    savedParking.endTime = Date.now();
-    savedParking.cost =
-      savedParking.unitPrice *
-      Math.ceil(
-        (savedParking.endTime - savedParking.startTime) / (1000 * 3600)
-      );
+  savedParking.isParked = false;
+  savedParking.endTime = Date.now();
+  savedParking.cost =
+    savedParking.unitPrice *
+    Math.ceil((savedParking.endTime - savedParking.startTime) / (1000 * 3600));
 
+  // fail-safe-check; this should not happen
+  if (!savedParking.paymentId) {
+    paymentHook(savedParking);
+    return {
+      success: false,
+      message: 'No payment method',
+      code: 402,
+    };
+  }
+
+  const result = await PaymentService.authorizePayment(
+    req,
+    savedParking.paymentId
+  );
+
+  if (!result.success) {
+    paymentHook(savedParking);
+    savedParking.isPaid = false;
+  } else {
+    savedParking.isPaid = true;
+  }
+
+  try {
     await savedParking.save();
   } catch (exception) {
     LOG.error(req._id, exception.message);

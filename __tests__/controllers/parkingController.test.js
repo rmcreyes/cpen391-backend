@@ -134,7 +134,7 @@ describe('Meter Tests', () => {
     const currentParkings = res.body.currentParkings;
     expect(currentParkings.length).toEqual(1);
     expect(currentParkings[0].isParked).toEqual(true);
-    expect(currentParkings[0].paid).toEqual(false);
+    expect(currentParkings[0].isPaid).toEqual(false);
     expect(currentParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(currentParkings[0].userId).toEqual(userId);
     expect(currentParkings[0].carId).toEqual(carOne.id);
@@ -166,7 +166,7 @@ describe('Meter Tests', () => {
     const allParkings = res.body.allParkings;
     expect(allParkings.length).toEqual(1);
     expect(allParkings[0].isParked).toEqual(true);
-    expect(allParkings[0].paid).toEqual(false);
+    expect(allParkings[0].isPaid).toEqual(false);
     expect(allParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(allParkings[0].userId).toEqual(userId);
     expect(allParkings[0].carId).toEqual(carOne.id);
@@ -212,7 +212,7 @@ describe('Meter Tests', () => {
     const previousParkings = res.body.previousParkings;
     expect(previousParkings.length).toEqual(1);
     expect(previousParkings[0].isParked).toEqual(false);
-    expect(previousParkings[0].paid).toEqual(false);
+    expect(previousParkings[0].isPaid).toEqual(false);
     expect(previousParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(previousParkings[0].userId).toEqual(userId);
     expect(previousParkings[0].carId).toEqual(carOne.id);
@@ -233,7 +233,7 @@ describe('Meter Tests', () => {
     const allParkings = res.body.allParkings;
     expect(allParkings.length).toEqual(1);
     expect(allParkings[0].isParked).toEqual(false);
-    expect(allParkings[0].paid).toEqual(false);
+    expect(allParkings[0].isPaid).toEqual(false);
     expect(allParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(allParkings[0].userId).toEqual(userId);
     expect(allParkings[0].carId).toEqual(carOne.id);
