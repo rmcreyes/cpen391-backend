@@ -6,7 +6,7 @@ const Car = require('../models/car');
 const Parking = require('../models/parking');
 const Meter = require('../models/meter');
 
-const { parkingConfirmationHook } = require('../webhook/webhook');
+const { parkingConfirmationHook, paymentHook } = require('../webhook/webhook');
 
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
@@ -90,7 +90,9 @@ const createParking = async (
 ) => {
   let savedCar;
   try {
-    savedCar = await Car.findOne({ licensePlate: licensePlate });
+    savedCar = await Car.findOne({ licensePlate: licensePlate }).populate(
+      'userId'
+    );
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return {
@@ -100,12 +102,14 @@ const createParking = async (
     };
   }
 
+  //#region
   // DONE: what if sent the same create parking twice?
   // Need to check meterId, licensePlate, carId
   // Or... check in Meter.isOccupied?
   // if request.isOccupied == true && Meter.isOccupied == true
   // and request.licensePlate === Meter.licensePlate
   // then no need to create new parking!
+  //#endregion
 
   const parking = new Parking({
     licensePlate: licensePlate,
@@ -114,6 +118,7 @@ const createParking = async (
     meterId: meterId,
     unitPrice: unitPrice,
     isConfirmed: isConfirmed ? true : false,
+    paymentId: savedCar ? savedCar.userId.paymentId : undefined,
   });
 
   let newParking;
@@ -148,10 +153,30 @@ const createParking = async (
     );
   }
 
+  // alert admin if no payment method
+  if (!newParking.paymentId) {
+    setTimeout(
+      async parkingId => {
+        let savedParking;
+        try {
+          savedParking = await Parking.findById(parkingId);
+        } catch (exception) {
+          LOG.error(req._id, exception.message);
+        }
+
+        if (!savedParking.paymentId) {
+          paymentHook(savedParking);
+        }
+      },
+      process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+      newParking.id
+    );
+  }
+
   return {
     success: true,
     parkingId: newParking.id,
-    isUser: newParking.userId ? true : false
+    isUser: newParking.userId ? true : false,
   };
 };
 
@@ -280,10 +305,34 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
   };
 };
 
+const parkingAddPaymentId = async (req, parkingId, paymentId) => {
+  let savedParking;
+  try {
+    savedParking = await Parking.findByIdAndUpdate(
+      parkingId,
+      { paymentId: paymentId },
+      { new: true }
+    );
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Update parking unknown error',
+      code: 500,
+    };
+  }
+
+  return {
+    success: true,
+    savedParking: savedParking,
+  };
+};
+
 module.exports = {
   getCurrentPreviousParkings,
   getAllParkings,
   createParking,
   leaveParking,
   confirmLicensePlate,
+  parkingAddPaymentId,
 };

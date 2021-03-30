@@ -178,7 +178,7 @@ const updateStatus = async (req, res, next) => {
     return next(new HttpError('Updating meter failed', 500));
   }
 
-  // meterStatusChangeHook(savedMeter);
+  meterStatusChangeHook(savedMeter);
   return res
     .status(200)
     .json({ ...JSON.parse(JSON.stringify(savedMeter)), isUser });
