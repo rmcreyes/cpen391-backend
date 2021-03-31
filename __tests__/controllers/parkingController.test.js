@@ -33,6 +33,21 @@ describe('Meter Tests', () => {
     token = res.body.token;
   });
 
+  const userPayment = {
+    cardNum: 987654321,
+    expDate: 111,
+    cvv: 333,
+  };
+  it('201 add payment for user', async () => {
+    const res = await api
+      .post(`/api/payment/user/${userId}`)
+      .set('Authorization', `Bear ${token}`)
+      .send(userPayment);
+
+    expect(res.statusCode).toEqual(201);
+    expect(res.body).toEqual(true);
+  });
+
   const newMeter = {
     unitPrice: 12,
   };
@@ -212,7 +227,7 @@ describe('Meter Tests', () => {
     const previousParkings = res.body.previousParkings;
     expect(previousParkings.length).toEqual(1);
     expect(previousParkings[0].isParked).toEqual(false);
-    expect(previousParkings[0].isPaid).toEqual(false);
+    expect(previousParkings[0].isPaid).toEqual(true);
     expect(previousParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(previousParkings[0].userId).toEqual(userId);
     expect(previousParkings[0].carId).toEqual(carOne.id);
@@ -233,7 +248,7 @@ describe('Meter Tests', () => {
     const allParkings = res.body.allParkings;
     expect(allParkings.length).toEqual(1);
     expect(allParkings[0].isParked).toEqual(false);
-    expect(allParkings[0].isPaid).toEqual(false);
+    expect(allParkings[0].isPaid).toEqual(true);
     expect(allParkings[0].licensePlate).toEqual(carOne.licensePlate);
     expect(allParkings[0].userId).toEqual(userId);
     expect(allParkings[0].carId).toEqual(carOne.id);
@@ -241,6 +256,31 @@ describe('Meter Tests', () => {
     expect(allParkings[0].unitPrice).toEqual(newMeter.unitPrice);
     expect(allParkings[0].startTime).toBeTruthy();
     expect(allParkings[0].cost).toBeTruthy();
+  });
+
+  /* ====================================================================================================================================================
+   */
+  it('200 assume guest isOccupied: true', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: true, licensePlate: 'QQQAAA' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
+    expect(res.body.isOccupied).toEqual(true);
+    expect(res.body.parkingId).toBeTruthy();
+    expect(res.body.id).toEqual(newMeter.id);
+
+    parkingId = res.body.parkingId;
+  });
+
+  it('200 confirmed as user car', async () => {
+    const res = await api
+      .put(`/api/parking/confirm/${parkingId}`)
+      .send({ isNew: true, licensePlate: carOne.licensePlate });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.parkingId).toEqual(parkingId);
   });
 
   afterAll(async done => {
