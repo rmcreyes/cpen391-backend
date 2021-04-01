@@ -41,6 +41,24 @@ describe('Car Tests', () => {
     expect(res.body.message).toEqual('Not found');
   });
 
+  it('401 auth fail', async () => {
+    const res = await api
+      .get(`/api/car/${userId}`)
+      .set('Authorization', `BAD AUTH`);
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.message).toEqual('Authentication failed!');
+  });
+
+  it('401 auth fail', async () => {
+    const res = await api
+      .get(`/api/car/${userId}`)
+      .set('Authorization', `Bear FAIL_TOKEN`);
+
+    expect(res.statusCode).toEqual(401);
+    expect(res.body.message).toEqual('Authentication failed!');
+  });
+
   let carOne = {
     carName: 'MY_CAR',
     licensePlate: '123ABC',

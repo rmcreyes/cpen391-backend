@@ -18,11 +18,7 @@ const buildMeterStatusChangeMessage = savedMeter => {
     value: savedMeter.licensePlate ? savedMeter.licensePlate : 'None',
     inline: true,
   };
-  const isConfirmed = {
-    name: 'isConfirmed',
-    value: savedMeter.isConfirmed ? savedMeter.isConfirmed : 'None',
-    inline: true,
-  };
+
   const parkingId = {
     name: 'parkingId',
     value: savedMeter.parkingId ? savedMeter.parkingId : 'None',
@@ -41,7 +37,6 @@ const buildMeterStatusChangeMessage = savedMeter => {
     unitPrice,
     isOccupied,
     licensePlate,
-    isConfirmed,
     parkingId,
     cost,
   ];
@@ -62,7 +57,7 @@ const buildMeterStatusChangeMessage = savedMeter => {
   return body;
 };
 
-const buildParkingConfirmationMessage = savedParking => {
+const buildParkingMessage = (savedParking, aboutConfirmation) => {
   const meterId = {
     name: 'meterId',
     value: savedParking.meterId,
@@ -85,11 +80,18 @@ const buildParkingConfirmationMessage = savedParking => {
     value: savedParking.startTime,
   };
 
+  const paymentId = {
+    name: 'paymentId',
+    value: savedParking.paymentId ? savedParking.paymentId : 'None',
+  };
+
+  const parkingNotConfirmed = 'Parking Not Confirmed ❌';
+  const parkingNoPayment = 'Parking Has No Payment ❌';
   const author = {
-    name: 'Parking Not Confirmed ❌',
+    name: aboutConfirmation ? parkingNotConfirmed : parkingNoPayment
   };
   const color = 16711680; // red
-  const fields = [meterId, parkingId, licensePlate, startTime];
+  const fields = [meterId, parkingId, licensePlate, startTime, paymentId];
   const footer = {
     text: `updatedAt: ${savedParking.updatedAt}`,
   };
@@ -109,5 +111,5 @@ const buildParkingConfirmationMessage = savedParking => {
 
 module.exports = {
   buildMeterStatusChangeMessage,
-  buildParkingConfirmationMessage,
+  buildParkingMessage,
 };

@@ -5,7 +5,7 @@ const LOG = require('../utils/logger');
 
 const {
   buildMeterStatusChangeMessage,
-  buildParkingConfirmationMessage,
+  buildParkingMessage,
 } = require('./messageBuilder');
 
 const meterStatusChangeHook = async savedMeter => {
@@ -15,16 +15,24 @@ const meterStatusChangeHook = async savedMeter => {
 };
 
 const parkingConfirmationHook = async savedParking => {
-  const body = buildParkingConfirmationMessage(savedParking);
+  const body = buildParkingMessage(savedParking, true);
 
   sendHook(process.env.PARKINGCONFIRM_HOOK, body);
 };
 
+const paymentHook = async savedParking => {
+  const body = buildParkingMessage(savedParking, false);
+
+  sendHook(process.env.PAYMENT_HOOK, body);
+};
+
 const sendHook = async (url, body) => {
-  try {
-    await axios.post(url, body);
-  } catch (exception) {
-    LOG.error('Discord webhook failed', exception);
+  if (process.env.NODE_ENV !== 'test') {
+    try {
+      await axios.post(url, body);
+    } catch (exception) {
+      LOG.error('Discord webhook failed', exception);
+    }
   }
 
   return;
@@ -33,4 +41,5 @@ const sendHook = async (url, body) => {
 module.exports = {
   meterStatusChangeHook,
   parkingConfirmationHook,
+  paymentHook,
 };

@@ -5,8 +5,6 @@ const meterController = require('../controllers/meterController');
 
 const meterRouter = express.Router();
 
-// meterRouter.use(auth);
-
 meterRouter.get('/all', meterController.getAllMeterStatus);
 
 meterRouter.post(

@@ -6,7 +6,8 @@ const Car = require('../models/car');
 const Parking = require('../models/parking');
 const Meter = require('../models/meter');
 
-const { parkingConfirmationHook } = require('../webhook/webhook');
+const { parkingConfirmationHook, paymentHook } = require('../webhook/webhook');
+const PaymentService = require('./paymentService');
 
 const getCurrentPreviousParkings = async (req, userId, getCurrent) => {
   let savedParkings;
@@ -81,10 +82,18 @@ const getAllParkings = async (req, userId) => {
   };
 };
 
-const createParking = async (req, licensePlate, meterId, unitPrice) => {
+const createParking = async (
+  req,
+  licensePlate,
+  meterId,
+  unitPrice,
+  isConfirmed
+) => {
   let savedCar;
   try {
-    savedCar = await Car.findOne({ licensePlate: licensePlate });
+    savedCar = await Car.findOne({ licensePlate: licensePlate }).populate(
+      'userId'
+    );
   } catch (exception) {
     LOG.error(req._id, exception.message);
     return {
@@ -94,12 +103,14 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
     };
   }
 
+  //#region
   // DONE: what if sent the same create parking twice?
   // Need to check meterId, licensePlate, carId
   // Or... check in Meter.isOccupied?
   // if request.isOccupied == true && Meter.isOccupied == true
   // and request.licensePlate === Meter.licensePlate
   // then no need to create new parking!
+  //#endregion
 
   const parking = new Parking({
     licensePlate: licensePlate,
@@ -107,6 +118,8 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
     carId: savedCar ? savedCar.id : undefined,
     meterId: meterId,
     unitPrice: unitPrice,
+    isConfirmed: isConfirmed ? true : false,
+    paymentId: savedCar ? savedCar.userId.paymentId : undefined,
   });
 
   let newParking;
@@ -122,26 +135,49 @@ const createParking = async (req, licensePlate, meterId, unitPrice) => {
   }
 
   // alert admin if not confirmed within time minutes
-  setTimeout(
-    async parkingId => {
-      let savedParking;
-      try {
-        savedParking = await Parking.findById(parkingId);
-      } catch (exception) {
-        LOG.error(req._id, exception.message);
-      }
+  if (!newParking.isConfirmed) {
+    setTimeout(
+      async parkingId => {
+        let savedParking;
+        try {
+          savedParking = await Parking.findById(parkingId);
+        } catch (exception) {
+          LOG.error(req._id, exception.message);
+        }
 
-      if (!savedParking.isConfirmed) {
-        parkingConfirmationHook(savedParking);
-      }
-    },
-    process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
-    newParking.id
-  );
+        if (!savedParking.isConfirmed) {
+          parkingConfirmationHook(savedParking);
+        }
+      },
+      process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+      newParking.id
+    );
+  }
+
+  // alert admin if no payment method
+  if (!newParking.paymentId) {
+    setTimeout(
+      async parkingId => {
+        let savedParking;
+        try {
+          savedParking = await Parking.findById(parkingId);
+        } catch (exception) {
+          LOG.error(req._id, exception.message);
+        }
+
+        if (!savedParking.paymentId) {
+          paymentHook(savedParking);
+        }
+      },
+      process.env.PARKINGCONFRIM_WAIT_MIN * 60 * 1000,
+      newParking.id
+    );
+  }
 
   return {
     success: true,
     parkingId: newParking.id,
+    isUser: newParking.userId ? true : false,
   };
 };
 
@@ -156,23 +192,52 @@ const leaveParking = async (req, parkingId, licensePlate) => {
         code: 404,
       };
     }
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find parking failed',
+      code: 500,
+    };
+  }
 
-    if (savedParking.licensePlate !== licensePlate) {
-      return {
-        success: false,
-        message: 'Parking license plate not matched',
-        code: 404,
-      };
-    }
+  if (savedParking.licensePlate !== licensePlate) {
+    return {
+      success: false,
+      message: 'Parking license plate not matched',
+      code: 404,
+    };
+  }
 
-    savedParking.isParked = false;
-    savedParking.endTime = Date.now();
-    savedParking.cost =
-      savedParking.unitPrice *
-      Math.ceil(
-        (savedParking.endTime - savedParking.startTime) / (1000 * 3600)
-      );
+  savedParking.isParked = false;
+  savedParking.endTime = Date.now();
+  savedParking.cost =
+    savedParking.unitPrice *
+    Math.ceil((savedParking.endTime - savedParking.startTime) / (1000 * 3600));
 
+  // fail-safe-check; this should not happen
+  if (!savedParking.paymentId) {
+    paymentHook(savedParking);
+    return {
+      success: false,
+      message: 'No payment method',
+      code: 402,
+    };
+  }
+
+  const result = await PaymentService.authorizePayment(
+    req,
+    savedParking.paymentId
+  );
+
+  if (!result.success) {
+    paymentHook(savedParking);
+    savedParking.isPaid = false;
+  } else {
+    savedParking.isPaid = true;
+  }
+
+  try {
     await savedParking.save();
   } catch (exception) {
     LOG.error(req._id, exception.message);
@@ -245,7 +310,7 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
 
     await Meter.findByIdAndUpdate(
       newParking.meterId,
-      { licensePlate: licensePlate, isConfirmed: newParking.isConfirmed },
+      { licensePlate: licensePlate },
       { new: true }
     );
   } catch (exception) {
@@ -270,10 +335,34 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
   };
 };
 
+const parkingAddPaymentId = async (req, parkingId, paymentId) => {
+  let savedParking;
+  try {
+    savedParking = await Parking.findByIdAndUpdate(
+      parkingId,
+      { paymentId: paymentId },
+      { new: true }
+    );
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Update parking unknown error',
+      code: 500,
+    };
+  }
+
+  return {
+    success: true,
+    savedParking: savedParking,
+  };
+};
+
 module.exports = {
   getCurrentPreviousParkings,
   getAllParkings,
   createParking,
   leaveParking,
   confirmLicensePlate,
+  parkingAddPaymentId,
 };

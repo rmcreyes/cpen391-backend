@@ -15,6 +15,10 @@ const userSchema = new Schema(
         ref: 'Car',
       },
     ],
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Payment',
+    },
   },
   { versionKey: false }
 );
