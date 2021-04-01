@@ -107,7 +107,6 @@ describe('Meter Tests', () => {
     expect(res.body.carName).toEqual(userCar.carName);
     expect(res.body.licensePlate).toEqual(userCar.licensePlate.toUpperCase());
     expect(res.body.id).toBeTruthy();
-    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.userId).toEqual(userId);
 
     userCar.id = res.body.id;
