@@ -16,6 +16,13 @@ https://www.postman.com/steveny9911/workspace/cpen-391-backend/overview
 
 ![](static/leaving.drawio.png)
 
+# Deploy
+
+```sh
+git checkout main
+git push heroku main
+```
+
 # Set-up
 
 **Requirement**
