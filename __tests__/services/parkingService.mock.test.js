@@ -26,26 +26,10 @@ describe('Parking service with database mocking', () => {
     });
 
     const req = { id: 'ID' };
-    const result = await createParking(req, 'LICENSE_PLATE', 'METER_ID');
+    const result = await createParking(req, 'LICENSE_PLATE', 'METER_ID', 12, true);
     expect(result).toBeTruthy();
     expect(!result.success).toBeTruthy();
     expect(result.message).toEqual('Find car failed');
     expect(result.code).toEqual(500);
-  });
-
-  it('guest parking', async () => {
-    jest.spyOn(Car, 'findOne').mockImplementationOnce(() => {
-      return {};
-    });
-
-    jest.spyOn(Parking.prototype, 'save').mockImplementationOnce(() => {
-      return Promise.resolve({ id: 'PARKING_ID' });
-    });
-
-    const req = { id: 'ID' };
-    const result = await createParking(req, null, 'METER_ID');
-    expect(result).toBeTruthy();
-    expect(result.success).toBeTruthy();
-    expect(result.parkingId).toEqual('PARKING_ID');
   });
 });

@@ -26,7 +26,13 @@ const parkingSchema = new Schema(
     isParked: { type: Boolean, default: true },
     unitPrice: { type: Number, required: true },
     cost: { type: Number },
-    paid: { type: Boolean, default: false },
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Payment',
+      require: true,
+      default: undefined
+    },
+    isPaid: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

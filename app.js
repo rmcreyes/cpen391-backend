@@ -14,6 +14,7 @@ const userRoutes = require('./routes/userRoutes');
 const meterRoutes = require('./routes/meterRoutes');
 const carRoutes = require('./routes/carRoutes');
 const parkingRouter = require('./routes/parkingRoutes');
+const paymentRouter = require('./routes/paymentRoutes');
 
 // connect to db
 if (process.env.NODE_ENV !== 'production') {
@@ -88,6 +89,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/meter', meterRoutes);
 app.use('/api/car', carRoutes);
 app.use('/api/parking', parkingRouter);
+app.use('/api/payment', paymentRouter);
 
 // errors
 app.use((req, res, next) => {
