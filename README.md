@@ -1,9 +1,16 @@
 # cpen391-backend
 The backend to our CPEN 391 project
 
-# API documentation
+# API Documentation
 https://www.postman.com/steveny9911/workspace/cpen-391-backend/overview
 
+# Flow Diagram
+
+## Parking
+![](static/parking.drawio.png)
+
+## Leaving
+![](static/leaving.drawio.png)
 # Set-up
 **Requirement**
 - NodeJS 14
