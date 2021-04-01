@@ -108,7 +108,7 @@ const getUserProfile = async (req, res, next) => {
 
   let user;
   try {
-    user = await User.findById(userId, '-password');
+    user = await User.findById(userId, '-password').populate('paymentId');
   } catch (err) {
     LOG.error(req._id, err.message);
     return next(new HttpError('Failed to get profile', 500));

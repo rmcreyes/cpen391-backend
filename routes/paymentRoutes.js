@@ -30,4 +30,15 @@ paymentRouter.post(
   paymentController.addUserPayment
 );
 
+paymentRouter.put(
+  '/user/:userId',
+  [
+    check('userId').isMongoId(),
+    check('cardNum').isNumeric(),
+    check('expDate').isNumeric(),
+    check('cvv').isNumeric(),
+  ],
+  paymentController.updateUserPayment
+);
+
 module.exports = paymentRouter;

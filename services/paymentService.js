@@ -65,6 +65,13 @@ const authorizePayment = async (req, paymentId) => {
     };
   }
 
+  if (!savedPayment)
+    return {
+      success: false,
+      message: 'Payment authorization failed',
+      code: 401,
+    };
+
   const body = {
     cardNum: savedPayment.cardNum,
     expDate: savedPayment.expDate,
@@ -87,7 +94,35 @@ const authorizePayment = async (req, paymentId) => {
   return response.data;
 };
 
+const updatePayment = async (req, paymentId, cardNum, expDate, cvv) => {
+  let savedPayment;
+  try {
+    savedPayment = await Payment.findByIdAndUpdate(
+      paymentId,
+      { cardNum: cardNum, expDate: expDate, cvv: cvv },
+      { new: true }
+    );
+  } catch (exception) {
+    LOG.error(req._id, exception.message);
+    return {
+      success: false,
+      message: 'Find payment failed',
+      code: 500,
+    };
+  }
+
+  if (!savedPayment)
+    return {
+      success: false,
+      message: 'Payment authorization failed',
+      code: 401,
+    };
+
+  return { success: true, savedPayment };
+};
+
 module.exports = {
   createPayment,
   authorizePayment,
+  updatePayment,
 };
