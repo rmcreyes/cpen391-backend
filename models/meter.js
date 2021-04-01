@@ -27,7 +27,6 @@ meterSchema.set('toJSON', {
     delete returnedObject._id;
     delete returnedObject.__v;
     delete returnedObject.createdAt;
-    delete returnedObject.updatedAt;
 
     if (!returnedObject.cost) delete returnedObject.cost;
     if (!returnedObject.licensePlate) delete returnedObject.licensePlate;
