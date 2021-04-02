@@ -63,6 +63,33 @@ describe('Car Tests', () => {
     carName: 'MY_CAR',
     licensePlate: '123ABC',
   };
+
+  it('402 mising payment', async () => {
+    const res = await api
+      .post(`/api/car/${userId}`)
+      .set('Authorization', `Bear ${token}`)
+      .send(carOne);
+
+    expect(res.statusCode).toEqual(402);
+    expect(res.body.message).toEqual('Missing payment');
+  });
+
+  const userPayment = {
+    cardNum: 987654321,
+    expDate: 123,
+    cvv: 987,
+  };
+
+  it('201 user adds payment on app', async () => {
+    const res = await api
+      .post(`/api/payment/user/${userId}`)
+      .set('Authorization', `Bear ${token}`)
+      .send(userPayment);
+
+    expect(res.statusCode).toEqual(201);
+    expect(res.body).toBeTruthy();
+  });
+
   it('201 add car successful', async () => {
     const res = await api
       .post(`/api/car/${userId}`)
