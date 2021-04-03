@@ -78,7 +78,10 @@ const postCar = async (req, res, next) => {
   if (!licensePlate) return next(new HttpError('Missing license plate', 400));
 
   try {
-    const user = await User.findById(userId);
+    const savedUser = await User.findById(userId);
+    if (!savedUser.paymentId) {
+      return next(new HttpError('Missing payment', 402));
+    }
 
     const car = new Car({
       carName: body.carName || licensePlate.toUpperCase(),
@@ -88,8 +91,8 @@ const postCar = async (req, res, next) => {
 
     const savedCar = await car.save();
 
-    await user.cars.push(savedCar.id);
-    await user.save();
+    await savedUser.cars.push(savedCar.id);
+    await savedUser.save();
 
     return res.status(201).json(savedCar);
   } catch (err) {
