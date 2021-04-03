@@ -155,6 +155,7 @@ describe('Meter Tests', () => {
     expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
     expect(res.body.isOccupied).toEqual(false);
     expect(res.body.id).toEqual(newMeter.id);
+    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.parkingId).not.toBeTruthy();
   });
 
@@ -180,6 +181,7 @@ describe('Meter Tests', () => {
     expect(res.body.isOccupied).toEqual(true);
     expect(res.body.id).toEqual(newMeter.id);
     expect(res.body.parkingId).toBeTruthy();
+    expect(res.body.updatedAt).toBeTruthy();
     expect(res.body.isUser).toEqual(false);
 
     parkingId = res.body.parkingId;
@@ -227,6 +229,7 @@ describe('Meter Tests', () => {
     expect(res.body.isOccupied).toEqual(false);
     expect(res.body.id).toEqual(newMeter.id);
     expect(res.body.parkingId).not.toBeTruthy();
+    expect(res.body.updatedAt).toBeTruthy();
   });
 
   it('401 meter is not occupied', async () => {
