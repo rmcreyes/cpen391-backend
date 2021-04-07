@@ -18,7 +18,7 @@ carRouter.get(
 
 carRouter.post(
   '/:userId',
-  [check('licensePlate').isLength({ min: 6, max: 6 })],
+  [check('licensePlate').isLength({ min: 6, max: 8 })],
   carController.postCar
 );
 
