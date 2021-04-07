@@ -11,7 +11,7 @@ parkingRouter.put(
   [
     check('parkingId').isMongoId(),
     check('isNew').isBoolean(),
-    check('licensePlate').isLength({ min: 6, max: 6 }),
+    check('licensePlate').isLength({ min: 6, max: 8 }),
   ],
   parkingController.confirmParking
 );
