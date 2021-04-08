@@ -328,6 +328,7 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
     success: true,
     parkingId: newParking.id,
     isUser: newParking.userId ? true : false,
+    licensePlate: newParking.licensePlate
   };
 };
 
