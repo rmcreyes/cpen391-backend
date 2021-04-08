@@ -255,9 +255,10 @@ const leaveParking = async (req, parkingId, licensePlate) => {
 };
 
 const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
+  let newParking;
   if (!isNew) {
     try {
-      const newParking = await Parking.findByIdAndUpdate(
+      newParking = await Parking.findByIdAndUpdate(
         parkingId,
         { isConfirmed: true },
         { new: true }
@@ -268,11 +269,6 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
         { isConfirmed: newParking.isConfirmed },
         { new: true }
       );
-
-      return {
-        success: true,
-        parkingId: newParking.id,
-      };
     } catch (exception) {
       LOG.error(req._id, exception.message);
       return {
@@ -281,57 +277,57 @@ const confirmLicensePlate = async (req, parkingId, isNew, licensePlate) => {
         code: 500,
       };
     }
+  } else {
+    let savedCar;
+    try {
+      savedCar = await Car.findOne({ licensePlate: licensePlate });
+    } catch (exception) {
+      LOG.error(req._id, exception.message);
+      return {
+        success: false,
+        message: 'Find car failed',
+        code: 500,
+      };
+    }
+
+    try {
+      newParking = await Parking.findByIdAndUpdate(
+        parkingId,
+        {
+          licensePlate: licensePlate,
+          isConfirmed: true,
+          userId: savedCar ? savedCar.userId : undefined,
+          carId: savedCar ? savedCar.id : undefined,
+        },
+        { new: true }
+      );
+
+      await Meter.findByIdAndUpdate(
+        newParking.meterId,
+        { licensePlate: licensePlate },
+        { new: true }
+      );
+    } catch (exception) {
+      LOG.error(req._id, exception.message);
+      return {
+        success: false,
+        message: 'Update parking failed',
+        code: 500,
+      };
+    }
+
+    if (!newParking)
+      return {
+        success: false,
+        message: 'Update parking unknown error',
+        code: 500,
+      };
   }
-
-  let savedCar;
-  try {
-    savedCar = await Car.findOne({ licensePlate: licensePlate });
-  } catch (exception) {
-    LOG.error(req._id, exception.message);
-    return {
-      success: false,
-      message: 'Find car failed',
-      code: 500,
-    };
-  }
-
-  let newParking;
-  try {
-    newParking = await Parking.findByIdAndUpdate(
-      parkingId,
-      {
-        licensePlate: licensePlate,
-        isConfirmed: true,
-        userId: savedCar ? savedCar.userId : undefined,
-        carId: savedCar ? savedCar.id : undefined,
-      },
-      { new: true }
-    );
-
-    await Meter.findByIdAndUpdate(
-      newParking.meterId,
-      { licensePlate: licensePlate },
-      { new: true }
-    );
-  } catch (exception) {
-    LOG.error(req._id, exception.message);
-    return {
-      success: false,
-      message: 'Update parking failed',
-      code: 500,
-    };
-  }
-
-  if (!newParking)
-    return {
-      success: false,
-      message: 'Update parking unknown error',
-      code: 500,
-    };
 
   return {
     success: true,
     parkingId: newParking.id,
+    isUser: newParking.userId ? true : false,
   };
 };
 

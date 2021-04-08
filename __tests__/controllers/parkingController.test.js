@@ -136,6 +136,7 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.parkingId).toEqual(parkingId);
+    expect(res.body.isUser).toEqual(true);
   });
 
   it('200 get current parkings', async () => {
@@ -281,6 +282,7 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.parkingId).toEqual(parkingId);
+    expect(res.body.isUser).toEqual(true);
   });
 
   afterAll(async done => {
