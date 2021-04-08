@@ -136,6 +136,8 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.parkingId).toEqual(parkingId);
+    expect(res.body.isUser).toEqual(true);
+    expect(res.body.licensePlate).toEqual(carOne.licensePlate);
   });
 
   it('200 get current parkings', async () => {
@@ -281,6 +283,44 @@ describe('Meter Tests', () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.parkingId).toEqual(parkingId);
+    expect(res.body.isUser).toEqual(true);
+    expect(res.body.licensePlate).toEqual(carOne.licensePlate);
+  });
+
+  /* ====================================================================================================================================================
+   */
+  it('200 reset meter', async () => {
+    const res = await api.post(`/api/meter/${newMeter.id}/reset`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.isOccupied).toEqual(false);
+    expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
+    expect(res.body.id).toEqual(newMeter.id);
+  });
+
+  it('200 assume user isOccupied: true', async () => {
+    const res = await api
+      .put(`/api/meter/${newMeter.id}`)
+      .send({ isOccupied: true, licensePlate: carOne.licensePlate });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.unitPrice).toEqual(newMeter.unitPrice);
+    expect(res.body.isOccupied).toEqual(true);
+    expect(res.body.parkingId).toBeTruthy();
+    expect(res.body.id).toEqual(newMeter.id);
+
+    parkingId = res.body.parkingId;
+  });
+
+  it('200 confirmed as guest car', async () => {
+    const res = await api
+      .put(`/api/parking/confirm/${parkingId}`)
+      .send({ isNew: true, licensePlate: 'NOT USER' });
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.parkingId).toEqual(parkingId);
+    expect(res.body.isUser).toEqual(false);
+    expect(res.body.licensePlate).toEqual('NOT USER');
   });
 
   afterAll(async done => {
