@@ -12,6 +12,7 @@ const meterSchema = new Schema(
       ref: 'Parking',
       default: undefined,
     },
+    isConfirmed: { type: Boolean, default: false },
     cost: { type: Number },
   },
   { timestamps: true, versionKey: false }
