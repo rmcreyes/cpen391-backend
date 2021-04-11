@@ -2,6 +2,8 @@
 
 The backend to our CPEN 391 project
 
+![](https://github.com/rmcreyes/cpen391-backend/actions/workflows/node.js.yml/badge.svg)
+
 # API Documentation
 
 https://www.postman.com/steveny9911/workspace/cpen-391-backend/overview
@@ -10,7 +12,7 @@ https://www.postman.com/steveny9911/workspace/cpen-391-backend/overview
 
 ## Parking
 
-![](static/parking.drawio.png)
+![](static/parking_auto.drawio.png)
 
 ## Leaving
 

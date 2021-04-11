@@ -58,6 +58,7 @@ const resetMeter = async (req, res, next) => {
       meterId,
       {
         isOccupied: false,
+        isConfirmed: false,
         licensePlate: undefined,
         parkingId: undefined,
         cost: undefined,
